@@ -538,6 +538,7 @@ table td label.tot {
   font-weight: 600;
   color: var(--text-primary);
   font-size: var(--font-size-base);
+  white-space: nowrap;
 }
 
 /* ============================================

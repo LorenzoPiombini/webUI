@@ -18,9 +18,48 @@ function setActiveNavLink() {
 	});
 }
 
+// Keyboard Navigation
+function setupKeyboardNavigation() {
+	document.addEventListener('keydown', function(event) {
+		// Only trigger if not typing in an input field
+		if (event.target.tagName === 'INPUT' || 
+		    event.target.tagName === 'TEXTAREA' || 
+		    event.target.isContentEditable) {
+			return;
+		}
+
+		// Prevent default only for our shortcut keys
+		const key = event.key;
+		let targetUrl = null;
+
+		switch(key) {
+			case '1':
+				targetUrl = 'sales_orders.html';
+				break;
+			case '2':
+				targetUrl = 'purchase_orders.html';
+				break;
+			case '3':
+				targetUrl = 'account_receivable.html';
+				break;
+			case '4':
+				targetUrl = 'account_payable.html';
+				break;
+			default:
+				return; // Not our shortcut, do nothing
+		}
+
+		if (targetUrl) {
+			event.preventDefault();
+			window.location.href = targetUrl;
+		}
+	});
+}
+
 // Set active link and load menu on page load
 document.addEventListener('DOMContentLoaded', function() {
 	setActiveNavLink();
+	setupKeyboardNavigation();
 	
 	/*LOAD MENU*/
 	const page = window.location.pathname;
@@ -1104,6 +1143,20 @@ function render_new_order(){
 	mainContainer.appendChild(d);
 	document.getElementById("new-order-table").addEventListener('change',compute_total);
 
+	// Focus on customer ID input and scroll to center the form
+	setTimeout(function() {
+		var custInput = document.getElementById("cust-id");
+		if (custInput) {
+			custInput.focus();
+		}
+		// Scroll the form into view, centered on screen
+		d.scrollIntoView({ 
+			behavior: 'smooth', 
+			block: 'center',
+			inline: 'nearest'
+		});
+	}, 100);
+
 	var btn = document.getElementById("new-order");
 	btn.textContent = "Back";
 	btn.setAttribute("id","back");
@@ -1151,19 +1204,25 @@ function compute_total(event) {
 	if(tbl == null){
 		tbl = document.getElementById("edit-order-table");
 	}
+	if(!tbl) return; // Table doesn't exist yet
+	
 	var rows = tbl.rows;
-	let sum = parseFloat("0.00");
+	let sum = 0;
 	for(let i = 1;i < rows.length; i++){
 		if(rows[i].style.display === "none") break;
 
 		Array.from(rows[i].children).forEach((cell,index)=>{
 			Array.from(cell.children).forEach(child =>{
-				if(child.textContent !== "") {
-					if(child.textContent === "0"){
-						sum = parseFloat(sum) + parseFloat(child.textContent);
-					}else{
-						let strs = child.textContent.split(" ");
-						sum = parseFloat(sum) + parseFloat(strs[1]);
+				// Only check elements with "tot" class
+				if(child.classList && child.classList.contains("tot")) {
+					var totText = child.textContent.trim();
+					if(totText && totText !== "") {
+						// Remove $ and spaces, then parse
+						var numStr = totText.replace(/\$/g, '').replace(/\s+/g, '').trim();
+						var numValue = parseFloat(numStr);
+						if(!isNaN(numValue)) {
+							sum += numValue;
+						}
 					}
 				}
 			});
@@ -1171,10 +1230,13 @@ function compute_total(event) {
 	}
 
 	var tot_lbl = document.getElementById("order-total-lbl");
-	if(tot_lbl.textContent === "")
-		tot_lbl.textContent = sum !== "Nan" ? `${sum.toFixed(2)}` : `${0.00}`;
-	else 
-		tot_lbl.textContent = sum !== "Nan" ? `${sum.toFixed(2)}` : `${tot_lbl.textContent}`;
+	if(tot_lbl) {
+		if(isNaN(sum) || sum === 0) {
+			tot_lbl.textContent = "$ 0.00";
+		} else {
+			tot_lbl.textContent = `$ ${sum.toFixed(2)}`;
+		}
+	}
 
 }
 
