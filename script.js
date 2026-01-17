@@ -56,10 +56,93 @@ function setupKeyboardNavigation() {
 	});
 }
 
+// Settings Modal Functions
+function initSettings() {
+	var settingsLink = document.getElementById('settings-link');
+	var settingsModal = document.getElementById('settings-modal');
+	var settingsClose = document.getElementById('settings-close');
+	
+	if (settingsLink) {
+		settingsLink.addEventListener('click', function(e) {
+			e.preventDefault();
+			openSettingsModal();
+		});
+	}
+	
+	if (settingsClose) {
+		settingsClose.addEventListener('click', closeSettingsModal);
+	}
+	
+	// Close modal when clicking outside
+	if (settingsModal) {
+		settingsModal.addEventListener('click', function(e) {
+			if (e.target === settingsModal) {
+				closeSettingsModal();
+			}
+		});
+	}
+	
+	// Load saved theme
+	loadTheme();
+	
+	// Setup theme selectors
+	setupThemeSelectors();
+}
+
+function openSettingsModal() {
+	var modal = document.getElementById('settings-modal');
+	if (modal) {
+		modal.classList.add('open');
+		document.body.style.overflow = 'hidden';
+	}
+}
+
+function closeSettingsModal() {
+	var modal = document.getElementById('settings-modal');
+	if (modal) {
+		modal.classList.remove('open');
+		document.body.style.overflow = '';
+	}
+}
+
+function setupThemeSelectors() {
+	var themeOptions = document.querySelectorAll('.theme-option');
+	themeOptions.forEach(option => {
+		option.addEventListener('click', function() {
+			var theme = this.getAttribute('data-theme');
+			setTheme(theme);
+			
+			// Update active state
+			themeOptions.forEach(opt => opt.classList.remove('active'));
+			this.classList.add('active');
+		});
+	});
+}
+
+function setTheme(theme) {
+	document.documentElement.setAttribute('data-theme', theme);
+	localStorage.setItem('bsm-theme', theme);
+}
+
+function loadTheme() {
+	var savedTheme = localStorage.getItem('bsm-theme') || 'light';
+	setTheme(savedTheme);
+	
+	// Update active theme option in modal
+	setTimeout(function() {
+		var activeOption = document.querySelector(`.theme-option[data-theme="${savedTheme}"]`);
+		if (activeOption) {
+			document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+			activeOption.classList.add('active');
+		}
+	}, 100);
+}
+
 // Set active link and load menu on page load
 document.addEventListener('DOMContentLoaded', function() {
 	setActiveNavLink();
 	setupKeyboardNavigation();
+	initSettings();
 	
 	/*LOAD MENU*/
 	const page = window.location.pathname;
