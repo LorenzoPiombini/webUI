@@ -497,25 +497,51 @@ function render_edit_order(){
 	var btn2 = document.getElementById("new-order");
 	btn2.style.display = "none";
 
+	// Get the main container
+	var mainContainer = document.querySelector('main') || document.getElementById('root');
+	if (!mainContainer) {
+		mainContainer = document.body;
+	}
+
+	// Create card container
 	const d = document.createElement(element.div.type);
 	d.setAttribute("id","edit-order-menu");
-	d.setAttribute("class","main");
-	d.setAttribute("style","margin-top:15px;");
+	d.classList.add("card", "fade-in");
 
-	/*create order nr input fields*/
+	// Form Header
+	var formHeader = document.createElement("div");
+	formHeader.className = "card-header";
+	formHeader.textContent = "Edit Sales Order";
+	d.appendChild(formHeader);
+
+	// Order Number Section
+	var orderInfoSection = document.createElement("div");
+	orderInfoSection.className = "form-section";
+
+	var orderInfoGrid = document.createElement("div");
+	orderInfoGrid.className = "form-grid";
+
+	// Order Number
+	var orderGroup = document.createElement("div");
+	orderGroup.className = "form-group";
 	var o_label = document.createElement("label");
-	o_label.textContent = "Order number:";
-	o_label.className = "label";
-	d.appendChild(o_label);
+	o_label.textContent = "Order Number";
+	o_label.setAttribute("for","edit-cust-id");
+	orderGroup.appendChild(o_label);
 
 	var input_order = document.createElement("input");
 	input_order.addEventListener("focus",get_orders);
 	input_order.className = "input_2px_border";
 	input_order.setAttribute("id","edit-cust-id");
-	d.appendChild(input_order);
+	input_order.setAttribute("type","text");
+	orderGroup.appendChild(input_order);
+	orderInfoGrid.appendChild(orderGroup);
 
-	document.body.appendChild(d);
+	orderInfoSection.appendChild(orderInfoGrid);
+	d.appendChild(orderInfoSection);
 
+	// Append to main container
+	mainContainer.appendChild(d);
 }
 
 function show_tax_authority()
@@ -570,9 +596,15 @@ function render_new_customer(){
 	const edit_cust_btn = document.getElementById("edit-cust");
 	edit_cust_btn.remove();
 
+	// Get the main container
+	var mainContainer = document.querySelector('main') || document.getElementById('root');
+	if (!mainContainer) {
+		mainContainer = document.body;
+	}
+
 	const d = document.createElement("div");
 	d.setAttribute("id","root-new-customer");
-	d.classList.add("main", "card", "fade-in");
+	d.classList.add("card", "fade-in");
 
 	// Form Header
 	var formHeader = document.createElement("div");
@@ -893,10 +925,12 @@ function render_new_customer(){
 	// Form Actions
 	var formActions = document.createElement("div");
 	formActions.className = "form-actions";
+	sb_btn.classList.add("success");
 	formActions.appendChild(sb_btn);
 	d.appendChild(formActions);
 
-	document.body.appendChild(d);
+	// Append to main container
+	mainContainer.appendChild(d);
 }
 
 function render_edit_cusromer(){}
@@ -909,60 +943,73 @@ function render_new_order(){
 		return;
 	}
 
+	// Get the main container
+	var mainContainer = document.querySelector('main') || document.getElementById('root');
+	if (!mainContainer) {
+		mainContainer = document.body;
+	}
+
+	// Create card container
 	const d = document.createElement(element.div.type);
 	d.setAttribute("id","new-order-menu");
-	d.setAttribute("style","margin-top:15px;");
-	d.setAttribute("class","main");
+	d.classList.add("card", "fade-in");
 
-	/*create custumer input fields*/
+	// Form Header
+	var formHeader = document.createElement("div");
+	formHeader.className = "card-header";
+	formHeader.textContent = "New Sales Order";
+	d.appendChild(formHeader);
+
+	// Customer and Price Level Section
+	var orderInfoSection = document.createElement("div");
+	orderInfoSection.className = "form-section";
+
+	var orderInfoGrid = document.createElement("div");
+	orderInfoGrid.className = "form-grid";
+
+	// Customer ID
+	var custGroup = document.createElement("div");
+	custGroup.className = "form-group";
 	var c_label = document.createElement("label");
-	c_label.textContent = "Customer id:";
-	c_label.className = "label";
-	d.appendChild(c_label);
+	c_label.textContent = "Customer ID";
+	c_label.setAttribute("for","cust-id");
+	custGroup.appendChild(c_label);
 
 	var input_customer = document.createElement("input");
 	input_customer.className = "input_2px_border";
 	input_customer.setAttribute("id","cust-id");
+	input_customer.setAttribute("type","text");
 	input_customer.setAttribute("title","Customer identification in the system");
 	input_customer.addEventListener("focus",get_customers);
-	d.appendChild(input_customer);
+	custGroup.appendChild(input_customer);
+	orderInfoGrid.appendChild(custGroup);
 
-	var br = document.createElement("br");
-	d.appendChild(br);
-
-	/*create price level input field*/	
+	// Price Level
+	var priceGroup = document.createElement("div");
+	priceGroup.className = "form-group";
 	var price_label = document.createElement("label");
-	price_label.textContent = "Price level:";
-	price_label.className = "label";
-	d.appendChild(price_label);
+	price_label.textContent = "Price Level";
+	price_label.setAttribute("for","price-level");
+	priceGroup.appendChild(price_label);
 
 	var price_level= document.createElement("input");
 	price_level.className = "input_2px_border";
 	price_level.setAttribute("id","price-level");
-	d.appendChild(price_level);
+	price_level.setAttribute("type","text");
+	priceGroup.appendChild(price_level);
+	orderInfoGrid.appendChild(priceGroup);
 
-	var add_line = document.createElement("button");
-	add_line.textContent = "Add line";
-	add_line.setAttribute("id","add_line");
-	add_line.setAttribute("style","font-size:18px;margin-rigth:18px;");
-	add_line.addEventListener("click",function(event){
-		add_line_to_order("new-order-table");
-	});
-
-	d.appendChild(add_line);
-
-	var submit = document.createElement("button");
-	submit.textContent = "Submit";
-	submit.setAttribute("id","submit");
-	submit.setAttribute("style","font-size:18px;margin-right:500px;");
-	submit.addEventListener("click",function(event){
-		submit_order("new",0,"new-order-table");
-	});
-	d.appendChild(submit);
+	// Order Date
+	var dateGroup = document.createElement("div");
+	dateGroup.className = "form-group";
+	var date_label = document.createElement("label");
+	date_label.textContent = "Order Date";
+	dateGroup.appendChild(date_label);
 
 	var date = document.createElement("label");
 	date.setAttribute("id","date");
-	date.setAttribute("style","font-size:24px;");
+	date.style.fontSize = "var(--font-size-lg)";
+	date.style.fontWeight = "600";
 	var today = new Date();
 	var day = today.getDate();
 	var month = today.getMonth() +1;
@@ -970,29 +1017,91 @@ function render_new_order(){
 	if(month < 10) month = '0' + month;
 	if(day < 10) day = '0' + day;
 	date.textContent = `${month}-${day}-${year}`;	
-	d.appendChild(date);
+	dateGroup.appendChild(date);
+	orderInfoGrid.appendChild(dateGroup);
 
+	orderInfoSection.appendChild(orderInfoGrid);
+	d.appendChild(orderInfoSection);
 
-	/*create the table to insert the orders*/
-	d.appendChild(create_table(1,["Item","Uom","Qty","Disc","Unit Price","Total","Request Date",""],"new-order-table"));
-	var br2 = document.createElement("br");
-	d.appendChild(br2);
+	// Table Section
+	var tableSection = document.createElement("div");
+	tableSection.className = "form-section";
+	
+	var tableHeader = document.createElement("div");
+	tableHeader.style.display = "flex";
+	tableHeader.style.justifyContent = "space-between";
+	tableHeader.style.alignItems = "center";
+	tableHeader.style.marginBottom = "var(--spacing-md)";
+
+	var tableTitle = document.createElement("h3");
+	tableTitle.className = "section-title";
+	tableTitle.textContent = "Order Lines";
+	tableTitle.style.marginBottom = "0";
+	tableHeader.appendChild(tableTitle);
+
+	var add_line = document.createElement("button");
+	add_line.textContent = "➕ Add Line";
+	add_line.className = "button";
+	add_line.setAttribute("id","add_line");
+	add_line.addEventListener("click",function(event){
+		add_line_to_order("new-order-table");
+	});
+	tableHeader.appendChild(add_line);
+
+	tableSection.appendChild(tableHeader);
+	d.appendChild(tableSection);
+
+	// Table Container
+	var tableContainer = document.createElement("div");
+	tableContainer.style.overflowX = "auto";
+	tableContainer.appendChild(create_table(1,["Item","Uom","Qty","Disc","Unit Price","Total","Request Date",""],"new-order-table"));
+	d.appendChild(tableContainer);
+
+	// Order Total Section
+	var totalSection = document.createElement("div");
+	totalSection.className = "form-section";
+	totalSection.style.borderTop = "2px solid var(--border-color)";
+	totalSection.style.paddingTop = "var(--spacing-lg)";
+	totalSection.style.marginTop = "var(--spacing-xl)";
+
+	var totalContainer = document.createElement("div");
+	totalContainer.style.display = "flex";
+	totalContainer.style.justifyContent = "flex-end";
+	totalContainer.style.alignItems = "center";
+	totalContainer.style.gap = "var(--spacing-md)";
 
 	var order_total_desc = document.createElement("label");
-	order_total_desc.textContent = "Order Total: $";
-	order_total_desc.setAttribute("style","font-size:24px;margin-right:15px;");
+	order_total_desc.textContent = "Order Total:";
+	order_total_desc.style.fontSize = "var(--font-size-xl)";
+	order_total_desc.style.fontWeight = "600";
 	var order_total_label= document.createElement("label");
-	order_total_label.setAttribute("style","font-size:24px;");
+	order_total_label.style.fontSize = "var(--font-size-xl)";
+	order_total_label.style.fontWeight = "700";
+	order_total_label.style.color = "var(--primary-color)";
 	order_total_label.setAttribute("id","order-total-lbl");
+	order_total_label.textContent = "$ 0.00";
 
-	const d_child_one = document.createElement(element.div.type);
-	d_child_one.setAttribute("id","order-total");
-	d_child_one.setAttribute("style","margin-left:64%;");
-	d_child_one.appendChild(order_total_desc);
-	d_child_one.appendChild(order_total_label);
-	d.appendChild(d_child_one);
+	totalContainer.appendChild(order_total_desc);
+	totalContainer.appendChild(order_total_label);
+	totalSection.appendChild(totalContainer);
 
-	document.body.appendChild(d);
+	// Form Actions
+	var formActions = document.createElement("div");
+	formActions.className = "form-actions";
+	var submit = document.createElement("button");
+	submit.textContent = "💾 Submit Order";
+	submit.className = "button success";
+	submit.setAttribute("id","submit");
+	submit.addEventListener("click",function(event){
+		submit_order("new",0,"new-order-table");
+	});
+	formActions.appendChild(submit);
+	totalSection.appendChild(formActions);
+
+	d.appendChild(totalSection);
+
+	// Append to main container
+	mainContainer.appendChild(d);
 	document.getElementById("new-order-table").addEventListener('change',compute_total);
 
 	var btn = document.getElementById("new-order");
@@ -1103,7 +1212,7 @@ function create_table_cell(columnName, table_id, row) {
 		cell.appendChild(input);
 		return cell;
 	}
-	
+	if(columnName === "Disc"){
 		var input = document.createElement("input");
 		input.setAttribute("type","number");
 		input.setAttribute("min",0);
@@ -1130,7 +1239,7 @@ function create_table_cell(columnName, table_id, row) {
 		input.classList.add("rdate","input_no_border");
 		cell.appendChild(input);
 		return cell;
-	}
+	}	
 	
 	if(columnName === ""){
 		// Remove button column
