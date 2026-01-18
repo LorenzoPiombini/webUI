@@ -138,6 +138,156 @@ function loadTheme() {
 	}, 100);
 }
 
+// Dashboard Functions
+function getThisWeekDateRange() {
+	const today = new Date();
+	const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+	
+	// Get Monday of this week
+	const monday = new Date(today);
+	const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust when day is Sunday
+	monday.setDate(diff);
+	monday.setHours(0, 0, 0, 0);
+	
+	// Get Sunday of this week
+	const sunday = new Date(monday);
+	sunday.setDate(monday.getDate() + 6);
+	sunday.setHours(23, 59, 59, 999);
+	
+	return { start: monday, end: sunday };
+}
+
+function formatDate(date) {
+	if (!date) return '';
+	const d = new Date(date);
+	const year = d.getFullYear();
+	const month = String(d.getMonth() + 1).padStart(2, '0');
+	const day = String(d.getDate()).padStart(2, '0');
+	return `${month}-${day}-${year}`;
+}
+
+function isDateInWeek(dateStr, weekStart, weekEnd) {
+	if (!dateStr) return false;
+	const date = new Date(dateStr);
+	return date >= weekStart && date <= weekEnd;
+}
+
+async function loadDashboardOrders() {
+	const weekRange = getThisWeekDateRange();
+	const weekStartStr = formatDate(weekRange.start);
+	const weekEndStr = formatDate(weekRange.end);
+	
+	// Load Sales Orders
+	try {
+		// you have to create an end point in the C backend it will not be sales_orders 
+		const salesResponse = await send(null, "GET", "sales_orders");
+		if (salesResponse && salesResponse.message && !salesResponse.message.includes("there are no orders")) {
+			displaySalesOrdersThisWeek(salesResponse.message, weekRange);
+		} else {
+			document.getElementById("sales-orders-week").innerHTML = 
+				'<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">No sales orders to ship this week.</p>';
+		}
+	} catch (error) {
+		document.getElementById("sales-orders-week").innerHTML = 
+			'<p style="text-align: center; color: var(--text-danger, #ef4444); padding: var(--spacing-xl);">Error loading sales orders.</p>';
+	}
+	
+	// Load Purchase Orders
+	try {
+		const poResponse = await send(null, "GET", "purchase_orders");
+		if (poResponse && poResponse.message && !poResponse.message.includes("there are no orders")) {
+			displayPurchaseOrdersThisWeek(poResponse.message, weekRange);
+		} else {
+			document.getElementById("purchase-orders-week").innerHTML = 
+				'<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">No purchase orders to receive this week.</p>';
+		}
+	} catch (error) {
+		document.getElementById("purchase-orders-week").innerHTML = 
+			'<p style="text-align: center; color: var(--text-danger, #ef4444); padding: var(--spacing-xl);">Error loading purchase orders.</p>';
+	}
+}
+
+function displaySalesOrdersThisWeek(orders, weekRange) {
+	const container = document.getElementById("sales-orders-week");
+	
+	if (!orders || orders.length === 0) {
+		container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">No sales orders to ship this week.</p>';
+		return;
+	}
+	
+	// Filter orders by request date within this week
+	const weekOrders = [];
+	orders.forEach(orderId => {
+		// We'll need to fetch order details to check request dates
+		// For now, just show all orders - you can enhance this by fetching each order's details
+		weekOrders.push(orderId);
+	});
+	
+	if (weekOrders.length === 0) {
+		container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">No sales orders to ship this week.</p>';
+		return;
+	}
+	
+	let html = '<div class="dashboard-orders-list">';
+	weekOrders.slice(0, 10).forEach(orderId => {
+		html += `
+			<div class="dashboard-order-item">
+				<a href="sales_orders.html" style="text-decoration: none; color: var(--primary-color); font-weight: 600;">
+					Order #${orderId}
+				</a>
+			</div>
+		`;
+	});
+	
+	if (weekOrders.length > 10) {
+		html += `<p style="text-align: center; color: var(--text-secondary); margin-top: var(--spacing-md);">
+			And ${weekOrders.length - 10} more orders...
+		</p>`;
+	}
+	
+	html += '</div>';
+	container.innerHTML = html;
+}
+
+function displayPurchaseOrdersThisWeek(orders, weekRange) {
+	const container = document.getElementById("purchase-orders-week");
+	
+	if (!orders || orders.length === 0) {
+		container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">No purchase orders to receive this week.</p>';
+		return;
+	}
+	
+	const weekOrders = [];
+	orders.forEach(orderId => {
+		weekOrders.push(orderId);
+	});
+	
+	if (weekOrders.length === 0) {
+		container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">No purchase orders to receive this week.</p>';
+		return;
+	}
+	
+	let html = '<div class="dashboard-orders-list">';
+	weekOrders.slice(0, 10).forEach(orderId => {
+		html += `
+			<div class="dashboard-order-item">
+				<a href="purchase_orders.html" style="text-decoration: none; color: var(--primary-color); font-weight: 600;">
+					PO #${orderId}
+				</a>
+			</div>
+		`;
+	});
+	
+	if (weekOrders.length > 10) {
+		html += `<p style="text-align: center; color: var(--text-secondary); margin-top: var(--spacing-md);">
+			And ${weekOrders.length - 10} more orders...
+		</p>`;
+	}
+	
+	html += '</div>';
+	container.innerHTML = html;
+}
+
 // Set active link and load menu on page load
 document.addEventListener('DOMContentLoaded', function() {
 	setActiveNavLink();
@@ -151,6 +301,11 @@ document.addEventListener('DOMContentLoaded', function() {
 		draw_customer_menu();
 	}else if(page.includes("sales_orders")){
 		draw_sales_order_menu();
+	}
+	
+	// Load dashboard data if on index page
+	if (page.includes("index") || page.endsWith("/") || page === "") {
+		loadDashboardOrders();
 	}
 });
 

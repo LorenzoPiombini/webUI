@@ -391,6 +391,40 @@ body {
   font-size: var(--font-size-lg);
 }
 
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+@media screen and (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-orders-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.dashboard-order-item {
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color var(--transition-fast);
+}
+
+.dashboard-order-item:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.dashboard-order-item:last-child {
+  border-bottom: none;
+}
+
 /* ============================================
    BUTTONS
    ============================================ */

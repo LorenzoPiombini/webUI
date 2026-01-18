@@ -25,9 +25,20 @@
 			<h1>Welcome to BSM</h1>
 			<p>Business System Management Dashboard</p>
 		</div>
-		<div class="card fade-in">
-			<div class="card-header">Quick Actions</div>
-			<p>Select a module from the sidebar to get started.</p>
+		<div class="dashboard-grid">
+			<div class="card fade-in">
+				<div class="card-header">📋 Sales Orders to Ship This Week</div>
+				<div id="sales-orders-week">
+					<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">Loading...</p>
+				</div>
+			</div>
+			
+			<div class="card fade-in">
+				<div class="card-header">🛒 Purchase Orders to Receive This Week</div>
+				<div id="purchase-orders-week">
+					<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">Loading...</p>
+				</div>
+			</div>
 		</div>
 	</main>
 	
