@@ -729,6 +729,7 @@ table td input.input_no_border {
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
+  color: var(--text-primary);
 }
 
 table td input.input_no_border:hover {
