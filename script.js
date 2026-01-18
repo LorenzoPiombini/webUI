@@ -1208,6 +1208,22 @@ function render_new_customer(){
 
 	// Append to main container
 	mainContainer.appendChild(d);
+	
+	// Focus on customer name input and scroll to show the form
+	setTimeout(function() {
+		var custNameInput = document.getElementById("new-customer-name");
+		if (custNameInput) {
+			custNameInput.focus();
+		}
+		// Minimal scroll - only scroll if form is not visible, then adjust slightly
+		//var formRect = d.getBoundingClientRect();
+		//var isVisible = formRect.top >= 0 && formRect.top < window.innerHeight;
+		
+		window.scrollBy({
+			top: 350,
+			behavior: 'smooth'
+		});
+	}, 200);
 }
 
 function render_edit_cusromer(){}
@@ -1381,19 +1397,24 @@ function render_new_order(){
 	mainContainer.appendChild(d);
 	document.getElementById("new-order-table").addEventListener('change',compute_total);
 
-	// Focus on customer ID input and scroll to center the form
+	// Focus on customer ID input and scroll to show the form
 	setTimeout(function() {
 		var custInput = document.getElementById("cust-id");
 		if (custInput) {
 			custInput.focus();
 		}
-		// Scroll the form into view, centered on screen
-		d.scrollIntoView({ 
-			behavior: 'smooth', 
-			block: 'center',
-			inline: 'nearest'
-		});
-	}, 100);
+		// Minimal scroll - only scroll if form is not visible
+		var formRect = d.getBoundingClientRect();
+		var isVisible = formRect.top >= 0 && formRect.top < window.innerHeight;
+		
+		if (!isVisible) {
+			d.scrollIntoView({ 
+				behavior: 'smooth', 
+				block: 'nearest',
+				inline: 'nearest'
+			});
+		}
+	}, 200);
 
 	var btn = document.getElementById("new-order");
 	btn.textContent = "Back";
