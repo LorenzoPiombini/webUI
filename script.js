@@ -1832,7 +1832,7 @@ async function submit_order(crud_op,value,from_table){
 }
 
 
-function submit_new_customer(){
+async function submit_new_customer(){
 	var inputs = document.querySelectorAll("input");
 
 	var cust_payload;
@@ -1870,16 +1870,17 @@ function submit_new_customer(){
 	});
 
 	cust_payload = remove_null_values({
-		c_name: cust_name === "" ? null : cust_name,
-		c_addr: cust_addr1 === "" ? null : cust_addr1,
-		c_csz: cust_csz === "" ? null : cust_csz,
-		c_email: cust_email === "" ? null : cust_email,
-		c_phone: cust_phone === "" ? null : cust_phone,
+		name: cust_name === "" ? null : cust_name,
+		addr: cust_addr1 === "" ? null : cust_addr1,
+		csz: cust_csz === "" ? null : cust_csz,
+		email: cust_email === "" ? null : cust_email,
+		phone: cust_phone === "" ? null : cust_phone,
 		c_terms: cust_terms === "" ? null : cust_terms,
-		c_limits: cust_credit_limit === "" ? null : cust_credit_limit,
 		c_limits: cust_credit_limit === "" ? null : cust_credit_limit,
 		c_whse_number: cust_warehouse === "" ? null : cust_warehouse
 	});
 
-	console.log(cust_payload);	
+	const json_payload = JSON.stringify(cust_payload);
+	const response = await send(json_payload,"POST","new_customer");
+	alert(`${response.message}`);
 }

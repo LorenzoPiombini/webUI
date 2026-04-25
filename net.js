@@ -1,12 +1,13 @@
 
 /* send data to the server */
 
+let address = "192.168.1.3"
 export async function send(payload,method,resource){
 	if(payload == null && method === "POST") return;
 	let req = 0;
 	if(method === "POST"){
 		console.log(`POST REQUEST with body: ${payload}`)
-		req = new Request(`http://artech:5043/${resource}`,{
+		req = new Request(`https://${address}/${resource}`,{
 			headers:{ 
 				"Content-Type": "application/json",
 			},
@@ -16,7 +17,7 @@ export async function send(payload,method,resource){
 	}
 
 	if(method === "GET"){
-		req = new Request(`http://artech:5043/${resource}`,{
+		req = new Request(`https://${address}/${resource}`,{
 			method: method,
 		});
 	}
