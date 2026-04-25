@@ -181,6 +181,7 @@ async function loadDashboardOrders() {
 	try {
 		// you have to create an end point in the C backend it will not be sales_orders 
 		const salesResponse = await send(null, "GET", "sales_orders");
+		console.log(salesResponse.message);
 		if (salesResponse && salesResponse.message && !salesResponse.message.includes("there are no orders")) {
 			displaySalesOrdersThisWeek(salesResponse.message, weekRange);
 		} else {
