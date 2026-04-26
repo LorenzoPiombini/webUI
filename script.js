@@ -323,7 +323,7 @@ function draw_customer_menu(){
 	var edit_customer = document.getElementById("edit-cust");
 	
 	new_customer.addEventListener("click",render_new_customer);
-	edit_customer.addEventListener("click",render_edit_cusromer);
+	edit_customer.addEventListener("click",render_edit_customer);
 }
 
 function draw_sales_order_menu(){
@@ -856,12 +856,23 @@ function show_tax_authority()
 function render_new_customer(){
 
 	/*get the root div*/
-	var root = document.getElementById("root-new-customer");
+	var root = document.getElementById("hidden-root-customer-menu");
 	if(root){
 		/*clear screen*/
-		root.remove();
-		location.reload();
-		return;		
+		const nw_cust_btn = document.getElementById("new-cust");
+		nw_cust_btn.textContent = "Back";
+		nw_cust_btn.removeEventListener("click",render_new_customer);
+		nw_cust_btn.addEventListener("click",clear_order_screen);
+		const edit_cust_btn = document.getElementById("edit-cust");
+		edit_cust_btn.style.display = "none";
+
+		root.style.display = null;
+		return;
+	}else{
+		/*clear screen*/
+		root = document.getElementById("new-customer-menu")
+		if(root)
+			return;
 	}
 
 	const sb_btn = document.createElement("button");
@@ -871,8 +882,10 @@ function render_new_customer(){
 
 	const nw_cust_btn = document.getElementById("new-cust");
 	nw_cust_btn.textContent = "Back";
+	nw_cust_btn.removeEventListener("click",render_new_customer);
+	nw_cust_btn.addEventListener("click",clear_order_screen);
 	const edit_cust_btn = document.getElementById("edit-cust");
-	edit_cust_btn.remove();
+	edit_cust_btn.style.display = "none";
 
 	// Get the main container
 	var mainContainer = document.querySelector('main') || document.getElementById('root');
@@ -1227,13 +1240,60 @@ function render_new_customer(){
 	}, 200);
 }
 
-function render_edit_cusromer(){}
+function render_edit_customer(){
+
+	var mainContainer = document.querySelector('main') || document.getElementById('root');
+	if(!mainContainer){
+		mainContainer = document.body;
+	}
+
+	// Create card container
+	const d = document.createElement("div");
+	d.setAttribute("id","root-edit-customer");
+	d.classList.add("card", "fade-in");
+
+	// Form Header
+	var formHeader = document.createElement("div");
+	formHeader.className = "card-header";
+	formHeader.textContent = "Edit Customer";
+	d.appendChild(formHeader);
+
+	var orderInfoGrid = document.createElement("div");
+	orderInfoGrid.className = "form-grid";
+
+	// Customer ID
+	var custGroup = document.createElement("div");
+	custGroup.className = "form-group";
+	var c_label = document.createElement("label");
+	c_label.textContent = "Customer ID";
+	c_label.setAttribute("for","cust-id");
+	custGroup.appendChild(c_label);
+
+	var input_customer = document.createElement("input");
+	input_customer.className = "input_2px_border";
+	input_customer.setAttribute("id","cust-id");
+	input_customer.setAttribute("type","text");
+	input_customer.setAttribute("title","Customer identification in the system");
+	input_customer.addEventListener("focus",get_customers);
+	custGroup.appendChild(input_customer);
+	orderInfoGrid.appendChild(custGroup);
+
+	d.appendChild(orderInfoGrid);
+	mainContainer.appendChild(d);
+}
 function render_new_order(){
 
-	var root = document.getElementById("new-order-menu");
+	var root = document.getElementById("hidden-new-order-menu");
 	if(root){
-		root.remove();
-		location.reload();
+		var btn = document.getElementById("new-order");
+		btn.textContent = "Back";
+		btn.setAttribute("id","back");
+		btn.removeEventListener("click",render_new_order);
+		btn.addEventListener("click",clear_order_screen);
+		var btn2 = document.getElementById("edit-order");
+		btn2.style.display = "none";
+		root.style.display = null;
+		root.setAttribute("id","new-order-menu");
 		return;
 	}
 
@@ -1604,39 +1664,142 @@ function add_line_to_order(table_id){
 	}
 }
 
+function get_root_id(){
+	let root = null;
+	let size = 4;
+	let ids = ["new-order-menu","edit-order-menu","root-customer-menu","root-customer-menu"];
+	let i = 0;
+	while(root === null && i < size){
+		root = document.getElementById(ids[i]);
+		i++;
+	}
+	return root;
+}
 function clear_order_screen(event){
 
 	var main_p = document.getElementById("root");
-	var root = document.getElementById("new-order-menu");
-	if(root == null){
-		root = document.getElementById("edit-order-menu");
-	}
-	if(event === undefined){
-		root.remove();
-		location.reload();
-		/*
-		var btn = document.getElementById("back");
-		if(root.id === "root"){
-			btn.textContent ="New Order";
-			btn.setAttribute("id", "new-order");
-			btn.removeEventListener("click",clear_order_screen);
-			btn.addEventListener("click",render_new_order);
-			var btn2 = document.getElementById("edit-order");
-			btn2.style.display = null;
-		}else if(root.id === "edit-order-menu"){
-			var btn = document.getElementById("back");
-			btn.textContent ="Edit Order";
-			btn.setAttribute("id", "edit-order");
-			btn.removeEventListener("click",clear_order_screen);
-			btn.addEventListener("click",render_edit_order);
-			var btn2 = document.getElementById("new-order");
-			btn2.style.display = null;
-		}
-		*/
+	var root = get_root_id();
+	if(root === null)
+		return;
 
+	if(event === undefined){
+		switch(root.id){
+			case "new-order-menu":
+			{
+				root.style.display = "none";
+				root.setAttribute("id","hidden-new-order-menu");
+				var btn = document.getElementById("back");
+				btn.textContent ="New Order";
+				btn.setAttribute("id", "new-order");
+				btn.removeEventListener("click",clear_order_screen);
+				btn.addEventListener("click",render_new_order);
+				var btn2 = document.getElementById("edit-order");
+				btn2.style.display = null;
+				break;
+			}
+			case "edit-order-menu":
+			{
+				root.style.display = "none";
+				root.setAttribute("id","hidden-edit-order-menu");
+				var btn = document.getElementById("back");
+				btn.textContent ="Edit Order";
+				btn.setAttribute("id", "edit-order");
+				btn.removeEventListener("click",clear_order_screen);
+				btn.addEventListener("click",render_edit_order);
+				var btn2 = document.getElementById("new-order");
+				btn2.style.display = null;
+				break;
+			}
+			case "root-new-customer":
+			{
+				root.style.display = "none";
+				root.setAttribute("id","hidden-root-new-customer");
+				var btn = document.getElementById("back");
+				btn.textContent ="New Customer";
+				btn.setAttribute("id", "new-cust");
+				btn.removeEventListener("click",clear_order_screen);
+				btn.addEventListener("click",render_new_customer);
+				var btn2 = document.getElementById("edit-cust");
+				btn2.style.display = null;
+				break;
+			}
+
+			case "root-edit-customer":
+			{
+				root.style.display = "none";
+				root.setAttribute("id","hidden-root-edit-customer");
+				var btn = document.getElementById("back");
+				btn.textContent ="Edit Customer";
+				btn.setAttribute("id", root.id);
+				btn.removeEventListener("click",clear_order_screen);
+				btn.addEventListener("click",render_edit_order);
+				var btn2 = document.getElementById("new-cust");
+				btn2.style.display = null;
+				break;
+			}
+			default:
+				break;
+		}
 		return;
 	}else if(event.type === 'click'){
-		
+		switch(root.id){
+			case "new-order-menu":
+			{
+				root.style.display = "none";
+				root.setAttribute("id","hidden-new-order-menu");
+				var btn = document.getElementById("back");
+				btn.textContent ="New Order";
+				btn.setAttribute("id", "new-order");
+				btn.removeEventListener("click",clear_order_screen);
+				btn.addEventListener("click",render_new_order);
+				var btn2 = document.getElementById("edit-order");
+				btn2.style.display = null;
+				break;
+			}
+			case "edit-order-menu":
+			{
+				root.style.display = "none";
+				root.setAttribute("id","hidden-edit-order-menu");
+				var btn = document.getElementById("back");
+				btn.textContent ="Edit Order";
+				btn.setAttribute("id", "edit-order");
+				btn.removeEventListener("click",clear_order_screen);
+				btn.addEventListener("click",render_edit_order);
+				var btn2 = document.getElementById("new-order");
+				btn2.style.display = null;
+				break;
+			}
+			case "root-new-customer":
+			{
+				root.style.display = "none";
+				root.setAttribute("id","hidden-root-new-customer");
+				var btn = document.getElementById("back");
+				btn.textContent ="New Customer";
+				btn.setAttribute("id", "new-cust");
+				btn.removeEventListener("click",clear_order_screen);
+				btn.addEventListener("click",render_new_customer);
+				var btn2 = document.getElementById("edit-cust");
+				btn2.style.display = null;
+				break;
+			}
+
+			case "root-edit-customer":
+			{
+				root.style.display = "none";
+				root.setAttribute("id","hidden-root-edit-customer");
+				var btn = document.getElementById("back");
+				btn.textContent ="Edit Customer";
+				btn.setAttribute("id", root.id);
+				btn.removeEventListener("click",clear_order_screen);
+				btn.addEventListener("click",render_edit_order);
+				var btn2 = document.getElementById("new-cust");
+				btn2.style.display = null;
+				break;
+			}
+			default:
+				break;
+		}
+
 		let result;
 		if(document.getElementById("cust-id") != null){
 			/*look for all the elements*/
@@ -1673,14 +1836,12 @@ function clear_order_screen(event){
 			}
 		}
 
+		/*
 		if(!result){
 			var root = document.getElementById("new-order-menu");
 			if(root == null){
 				root = document.getElementById("edit-order-menu");
 			}
-			root.remove();
-			location.reload();
-			/*
 			var btn = document.getElementById("back");
 			if(root.id === "new-oreder-menu"){
 				btn.textContent ="New Order";
@@ -1697,7 +1858,6 @@ function clear_order_screen(event){
 				var btn2 = document.getElementById("new-order");
 				btn2.style.display = null;
 			}
-			*/
 			return;
 		}else if(result.toLowerCase() === "yes" || result.toLowerCase() === "y"){
 			if(root.id === "new-order-menu"){
@@ -1726,7 +1886,8 @@ function clear_order_screen(event){
 				return;
 			}
 			return;
-		}
+		}*/
+
 	}
 }
 
