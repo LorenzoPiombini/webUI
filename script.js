@@ -1282,7 +1282,6 @@ function render_edit_customer(){
 	mainContainer.appendChild(d);
 }
 function render_new_order(){
-
 	var root = document.getElementById("hidden-new-order-menu");
 	if(root){
 		var btn = document.getElementById("new-order");
