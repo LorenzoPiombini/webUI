@@ -858,21 +858,17 @@ function render_new_customer(){
 	/*get the root div*/
 	var root = document.getElementById("hidden-root-customer-menu");
 	if(root){
-		/*clear screen*/
+		/*show the hidden new customer menu*/
 		const nw_cust_btn = document.getElementById("new-cust");
 		nw_cust_btn.textContent = "Back";
+		nw_cust_btn.setAttribute("id","back");
 		nw_cust_btn.removeEventListener("click",render_new_customer);
 		nw_cust_btn.addEventListener("click",clear_order_screen);
 		const edit_cust_btn = document.getElementById("edit-cust");
 		edit_cust_btn.style.display = "none";
-
 		root.style.display = null;
+		root.setAttribute("id","root-customer-menu");
 		return;
-	}else{
-		/*clear screen*/
-		root = document.getElementById("new-customer-menu")
-		if(root)
-			return;
 	}
 
 	const sb_btn = document.createElement("button");
@@ -882,6 +878,7 @@ function render_new_customer(){
 
 	const nw_cust_btn = document.getElementById("new-cust");
 	nw_cust_btn.textContent = "Back";
+	nw_cust_btn.setAttribute("id","back");
 	nw_cust_btn.removeEventListener("click",render_new_customer);
 	nw_cust_btn.addEventListener("click",clear_order_screen);
 	const edit_cust_btn = document.getElementById("edit-cust");
@@ -1246,6 +1243,15 @@ function render_edit_customer(){
 	if(!mainContainer){
 		mainContainer = document.body;
 	}
+
+	var b = document.getElementById("edit-cust");
+	b.setAttribute("id","back");
+	b.textContent = "Back";
+	b.removeEventListener("click",render_edit_customer);
+	b.addEventListener("click",clear_order_screen);
+
+	var b2 = document.getElementById("new-cust");
+	b2.style.display = "none";
 
 	// Create card container
 	const d = document.createElement("div");
@@ -1666,7 +1672,7 @@ function add_line_to_order(table_id){
 function get_root_id(){
 	let root = null;
 	let size = 4;
-	let ids = ["new-order-menu","edit-order-menu","root-customer-menu","root-customer-menu"];
+	let ids = ["new-order-menu","edit-order-menu","root-new-customer","root-edit-customer"];
 	let i = 0;
 	while(root === null && i < size){
 		root = document.getElementById(ids[i]);
@@ -1729,7 +1735,7 @@ function clear_order_screen(event){
 				root.setAttribute("id","hidden-root-edit-customer");
 				var btn = document.getElementById("back");
 				btn.textContent ="Edit Customer";
-				btn.setAttribute("id", root.id);
+				btn.setAttribute("id", "edit-cust");
 				btn.removeEventListener("click",clear_order_screen);
 				btn.addEventListener("click",render_edit_order);
 				var btn2 = document.getElementById("new-cust");
@@ -1788,7 +1794,7 @@ function clear_order_screen(event){
 				root.setAttribute("id","hidden-root-edit-customer");
 				var btn = document.getElementById("back");
 				btn.textContent ="Edit Customer";
-				btn.setAttribute("id", root.id);
+				btn.setAttribute("id", "edit-cust");
 				btn.removeEventListener("click",clear_order_screen);
 				btn.addEventListener("click",render_edit_order);
 				var btn2 = document.getElementById("new-cust");
