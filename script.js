@@ -715,11 +715,14 @@ function check_input(){
 			option.className = "dropdown-option";
 
 			option.addEventListener("click",async () =>{
-				input.value =customer;
+				input.value = customer;
 				clearDropdown();
-				/*this fetch customer info, like pay_price level, discounts, and 
-				 * possible restrictions like credit hold, selected  */
+				/*get the customer selected by the users*/
 				let response = await send(null,"GET",`customers/${customer}`);
+
+				console.log(JSON.stringify(response.message));
+				/*display the customer data*/
+				/*
 				if(response.message.on_credit_hold != undefined){
 					if(response.message.on_credit_hold == 1){
 							alert("client is on credit hold, see your manager");
@@ -727,6 +730,7 @@ function check_input(){
 							return;
 					}
 				}
+				*/
 			});
 			dropdown.appendChild(option);
 		});
@@ -856,7 +860,7 @@ function show_tax_authority()
 function render_new_customer(){
 
 	/*get the root div*/
-	var root = document.getElementById("hidden-root-customer-menu");
+	var root = document.getElementById("hidden-root-new-customer");
 	if(root){
 		/*show the hidden new customer menu*/
 		const nw_cust_btn = document.getElementById("new-cust");
@@ -864,10 +868,11 @@ function render_new_customer(){
 		nw_cust_btn.setAttribute("id","back");
 		nw_cust_btn.removeEventListener("click",render_new_customer);
 		nw_cust_btn.addEventListener("click",clear_order_screen);
+
 		const edit_cust_btn = document.getElementById("edit-cust");
 		edit_cust_btn.style.display = "none";
 		root.style.display = null;
-		root.setAttribute("id","root-customer-menu");
+		root.setAttribute("id","root-new-customer");
 		return;
 	}
 
@@ -1238,6 +1243,24 @@ function render_new_customer(){
 }
 
 function render_edit_customer(){
+
+	var root = document.getElementById("hidden-root-edit-customer");
+	if(root){
+
+		/*show the hidden*/
+		var bt = document.getElementById("edit-cust");
+		bt.setAttribute("id","back");
+		bt.textContent = "Back";
+		bt.removeEventListener("click",render_edit_customer);
+		bt.addEventListener("click",clear_order_screen);
+
+		var bt2 = document.getElementById("new-cust");
+		bt2.style.display = "none";
+		
+		root.setAttribute("id","root-edit-customer");
+		root.style.display = null;
+		return; 
+	}
 
 	var mainContainer = document.querySelector('main') || document.getElementById('root');
 	if(!mainContainer){
@@ -1737,7 +1760,7 @@ function clear_order_screen(event){
 				btn.textContent ="Edit Customer";
 				btn.setAttribute("id", "edit-cust");
 				btn.removeEventListener("click",clear_order_screen);
-				btn.addEventListener("click",render_edit_order);
+				btn.addEventListener("click",render_edit_customer);
 				var btn2 = document.getElementById("new-cust");
 				btn2.style.display = null;
 				break;
@@ -1796,7 +1819,7 @@ function clear_order_screen(event){
 				btn.textContent ="Edit Customer";
 				btn.setAttribute("id", "edit-cust");
 				btn.removeEventListener("click",clear_order_screen);
-				btn.addEventListener("click",render_edit_order);
+				btn.addEventListener("click",render_edit_customer);
 				var btn2 = document.getElementById("new-cust");
 				btn2.style.display = null;
 				break;
