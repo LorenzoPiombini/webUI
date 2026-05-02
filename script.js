@@ -720,17 +720,214 @@ function check_input(){
 				/*get the customer selected by the users*/
 				let response = await send(null,"GET",`customers/${customer}`);
 
+				/*TODO: remove this when you ready*/
 				console.log(JSON.stringify(response.message));
-				/*display the customer data*/
-				/*
-				if(response.message.on_credit_hold != undefined){
-					if(response.message.on_credit_hold == 1){
+
+				var root = document.getElementById("root-edit-customer");
+				if(root){
+					/*create layout customer*/
+					// Basic Information Section
+					var basicSection = document.createElement("div");
+					basicSection.className = "form-section";
+					var basicTitle = document.createElement("h3");
+					basicTitle.className = "section-title";
+					basicTitle.textContent = "Basic Information";
+					basicSection.appendChild(basicTitle);
+
+
+					// Basic Information Section
+					var basicSection = document.createElement("div");
+					basicSection.className = "form-section";
+					var basicTitle = document.createElement("h3");
+					basicTitle.className = "section-title";
+					basicTitle.textContent = "Basic Information";
+					basicSection.appendChild(basicTitle);
+
+					var basicGrid = document.createElement("div");
+					basicGrid.className = "form-grid";
+
+
+					var c_name_group = document.createElement("div");
+					c_name_group.className = "form-group";
+					var c_name_lbl = document.createElement("label");
+					c_name_lbl.textContent = "Customer Name";
+					c_name_lbl.setAttribute("for", "edit-customer-name");
+					var c_name_input = document.createElement("input");
+					c_name_input.classList.add("input_2px_border");
+					c_name_input.setAttribute("id","edit-customer-name");
+					c_name_input.setAttribute("type","text");
+					c_name_input.setAttribute("autocomplete","off");
+
+					c_name_input.value = response.message.name;
+					c_name_group.appendChild(c_name_lbl);
+					c_name_group.appendChild(c_name_input);
+					basicGrid.appendChild(c_name_group);
+
+
+					var c_hdq_id_group = document.createElement("div");
+					c_hdq_id_group.className = "form-group";
+					var c_hdq_id_lbl = document.createElement("label");
+					c_hdq_id_lbl.textContent = "Customer Headquarters ID";
+					c_hdq_id_lbl.setAttribute("for", "cust-hq-id");
+					var c_hdq_id_input = document.createElement("input");
+					c_hdq_id_input.classList.add("input_2px_border");
+					c_hdq_id_input.setAttribute("id","cust-hq-id");
+					c_hdq_id_input.setAttribute("type","text");
+					c_hdq_id_input.title = "Use an existing customer if this is just another shipping address";
+					c_hdq_id_input.addEventListener("focus",get_customers);
+					c_hdq_id_group.appendChild(c_hdq_id_lbl);
+					c_hdq_id_group.appendChild(c_hdq_id_input);
+					basicGrid.appendChild(c_hdq_id_group);
+
+					var sls_person_group = document.createElement("div");
+					sls_person_group.className = "form-group";
+					var sls_person_lbl = document.createElement("label");
+					sls_person_lbl.textContent = "Sales Person ID";
+					sls_person_lbl.setAttribute("for", "edit-sls-person");
+					var sls_person_input = document.createElement("input");
+					sls_person_input.classList.add("input_2px_border");	
+					sls_person_input.setAttribute("id","edit-sls-person");
+					sls_person_input.setAttribute("type","text");
+					sls_person_input.setAttribute("autocomplete","off");
+					sls_person_group.appendChild(sls_person_lbl);
+					sls_person_group.appendChild(sls_person_input);
+					basicGrid.appendChild(sls_person_group);
+
+					var main_pr_level_group = document.createElement("div");
+					main_pr_level_group.className = "form-group";
+					var main_pr_level_lbl = document.createElement("label");
+					main_pr_level_lbl.textContent = "Main Price Level";
+					main_pr_level_lbl.setAttribute("for", "edit-main-pr-level");
+					var main_pr_level_input = document.createElement("input");
+					main_pr_level_input.classList.add("input_2px_border");	
+					main_pr_level_input.setAttribute("id","edit-main-pr-level");
+					main_pr_level_input.setAttribute("type","text");
+					main_pr_level_input.setAttribute("autocomplete","off");
+					main_pr_level_input.title = "If you have configured Price levels you can choose one value, if you want to have a customer that always has a certain type of discount.";
+					main_pr_level_group.appendChild(main_pr_level_lbl);
+					main_pr_level_group.appendChild(main_pr_level_input);
+					basicGrid.appendChild(main_pr_level_group);
+
+					basicSection.appendChild(basicGrid);
+					root.appendChild(basicSection);
+
+					// Address Section
+					var addressSection = document.createElement("div");
+					addressSection.className = "form-section";
+					var addressTitle = document.createElement("h3");
+					addressTitle.className = "section-title";
+					addressTitle.textContent = "Address Information";
+					addressSection.appendChild(addressTitle);
+
+					var addressGrid = document.createElement("div");
+					addressGrid.className = "form-grid";
+
+					var addr1_group = document.createElement("div");
+					addr1_group.className = "form-group";
+					addr1_group.style.gridColumn = "1 / -1";
+					var addr1_lbl = document.createElement("label");
+					addr1_lbl.textContent = "Street Address";
+					addr1_lbl.setAttribute("for", "edit-addr1");
+					var addr1_input = document.createElement("input");
+					addr1_input.classList.add("input_2px_border");	
+					addr1_input.setAttribute("id","edit-addr1");
+					addr1_input.setAttribute("type","text");
+					addr1_input.setAttribute("autocomplete","street-address");
+					addr1_input.value = response.message.addr;
+					addr1_group.appendChild(addr1_lbl);
+					addr1_group.appendChild(addr1_input);
+					addressGrid.appendChild(addr1_group);
+
+					var addr2_group = document.createElement("div");
+					addr2_group.className = "form-group";
+					addr2_group.style.gridColumn = "1 / -1";
+					var addr2_lbl = document.createElement("label");
+					addr2_lbl.textContent = "Additional Address Info (Optional)";
+					addr2_lbl.setAttribute("for", "edit-addr2");
+					var addr2_input = document.createElement("input");
+					addr2_input.placeholder = "Apartment, suite, unit, etc.";
+					addr2_input.classList.add("input_2px_border");
+					addr2_input.setAttribute("id","edit-addr2");
+					addr2_input.setAttribute("type","text");
+					addr2_input.setAttribute("autocomplete","address-line2");
+					addr2_group.appendChild(addr2_lbl);
+					addr2_group.appendChild(addr2_input);
+					addressGrid.appendChild(addr2_group);
+
+					var csz = response.message.csz.split(" ");
+					var city_group = document.createElement("div");
+					city_group.className = "form-group";
+					var city_lbl = document.createElement("label");
+					city_lbl.textContent = "City";
+					city_lbl.setAttribute("for", "edit-city");
+					var city_input = document.createElement("input");
+					city_input.setAttribute("id","edit-city");
+					city_input.setAttribute("type","text");
+					city_input.classList.add("input_2px_border");
+					city_input.setAttribute("autocomplete","address-level2");
+					city_input.value = csz[0];
+					city_group.appendChild(city_lbl);
+					city_group.appendChild(city_input);
+					addressGrid.appendChild(city_group);
+
+					var state_group = document.createElement("div");
+					state_group.className = "form-group";
+					var state_lbl = document.createElement("label");
+					state_lbl.textContent = "State/Province";
+					state_lbl.setAttribute("for", "edit-state");
+					var state_input = document.createElement("input");
+					state_input.setAttribute("id","edit-state");
+					state_input.setAttribute("type","text");
+					state_input.classList.add("input_2px_border");
+					state_input.setAttribute("autocomplete","address-level1");
+					state_input.value = csz[1];
+					state_group.appendChild(state_lbl);
+					state_group.appendChild(state_input);
+					addressGrid.appendChild(state_group);
+
+					var zipcode_group = document.createElement("div");
+					zipcode_group.className = "form-group";
+					var zipcode_lbl = document.createElement("label");
+					zipcode_lbl.textContent = "Zip/Postal Code";
+					zipcode_lbl.setAttribute("for", "edit-zipcode");
+					var zipcode_input = document.createElement("input");
+					zipcode_input.setAttribute("id","edit-zipcode");
+					zipcode_input.setAttribute("type","text");
+					zipcode_input.classList.add("input_2px_border");
+					zipcode_input.setAttribute("autocomplete","postal-code");
+					zipcode_input.value = csz[2];
+					zipcode_group.appendChild(zipcode_lbl);
+					zipcode_group.appendChild(zipcode_input);
+					addressGrid.appendChild(zipcode_group);
+
+					var country_group = document.createElement("div");
+					country_group.className = "form-group";
+					var country_lbl = document.createElement("label");
+					country_lbl.textContent = "Country";
+					country_lbl.setAttribute("for", "edit-country");
+					var country_input = document.createElement("input");
+					country_input.setAttribute("id","edit-country");
+					country_input.setAttribute("type","text");
+					country_input.classList.add("input_2px_border");
+					country_input.setAttribute("autocomplete","country");
+					country_group.appendChild(country_lbl);
+					country_group.appendChild(country_input);
+					addressGrid.appendChild(country_group);
+
+					addressSection.appendChild(addressGrid);
+					root.appendChild(addressSection);
+				}else{
+					/*Here you are in the new sales order menu*/
+					/*
+					if(response.message.on_credit_hold != undefined){
+						if(response.message.on_credit_hold == 1){
 							alert("client is on credit hold, see your manager");
 							clear_order_screen();
 							return;
+						}
 					}
-				}
 				*/
+				}
 			});
 			dropdown.appendChild(option);
 		});
@@ -833,7 +1030,7 @@ function show_tax_authority()
 	if(ch_b.checked == true){
 		// Check if tax input already exists
 		if(document.getElementById("tax-input")) return;
-		
+
 		var tax_aut_group = document.createElement("div");
 		tax_aut_group.className = "form-group";
 		tax_aut_group.setAttribute("id","tax-input-group");
@@ -935,10 +1132,10 @@ function render_new_customer(){
 	c_hdq_id_group.className = "form-group";
 	var c_hdq_id_lbl = document.createElement("label");
 	c_hdq_id_lbl.textContent = "Customer Headquarters ID";
-	c_hdq_id_lbl.setAttribute("for", "cust-id");
+	c_hdq_id_lbl.setAttribute("for", "cust-hd-id");
 	var c_hdq_id_input = document.createElement("input");
 	c_hdq_id_input.classList.add("input_2px_border");
-	c_hdq_id_input.setAttribute("id","cust-id");
+	c_hdq_id_input.setAttribute("id","cust-hd-id");
 	c_hdq_id_input.setAttribute("type","text");
 	c_hdq_id_input.title = "Use an existing customer if this is just another shipping address";
 	c_hdq_id_input.addEventListener("focus",get_customers);
@@ -1224,7 +1421,7 @@ function render_new_customer(){
 
 	// Append to main container
 	mainContainer.appendChild(d);
-	
+
 	// Focus on customer name input and scroll to show the form
 	setTimeout(function() {
 		var custNameInput = document.getElementById("new-customer-name");
@@ -1234,7 +1431,7 @@ function render_new_customer(){
 		// Minimal scroll - only scroll if form is not visible, then adjust slightly
 		//var formRect = d.getBoundingClientRect();
 		//var isVisible = formRect.top >= 0 && formRect.top < window.innerHeight;
-		
+
 		window.scrollBy({
 			top: 350,
 			behavior: 'smooth'
@@ -1256,7 +1453,7 @@ function render_edit_customer(){
 
 		var bt2 = document.getElementById("new-cust");
 		bt2.style.display = "none";
-		
+
 		root.setAttribute("id","root-edit-customer");
 		root.style.display = null;
 		return; 
@@ -1408,7 +1605,7 @@ function render_new_order(){
 	// Table Section
 	var tableSection = document.createElement("div");
 	tableSection.className = "form-section";
-	
+
 	var tableHeader = document.createElement("div");
 	tableHeader.style.display = "flex";
 	tableHeader.style.justifyContent = "space-between";
@@ -1495,7 +1692,7 @@ function render_new_order(){
 		// Minimal scroll - only scroll if form is not visible
 		var formRect = d.getBoundingClientRect();
 		var isVisible = formRect.top >= 0 && formRect.top < window.innerHeight;
-		
+
 		if (!isVisible) {
 			d.scrollIntoView({ 
 				behavior: 'smooth', 
@@ -1553,7 +1750,7 @@ function compute_total(event) {
 		tbl = document.getElementById("edit-order-table");
 	}
 	if(!tbl) return; // Table doesn't exist yet
-	
+
 	var rows = tbl.rows;
 	let sum = 0;
 	for(let i = 1;i < rows.length; i++){
@@ -1612,7 +1809,7 @@ function create_table_cell(columnName, table_id, row) {
 		cell.appendChild(tot);
 		return cell;
 	}
-	
+
 	if(columnName === "Qty"){
 		var input = document.createElement("input");
 		input.setAttribute("type","number");
@@ -1632,7 +1829,7 @@ function create_table_cell(columnName, table_id, row) {
 		cell.appendChild(input);
 		return cell;
 	}
-	
+
 	if(columnName === "Unit Price"){
 		var input = document.createElement("input");
 		input.setAttribute("type","number");
@@ -1642,7 +1839,7 @@ function create_table_cell(columnName, table_id, row) {
 		cell.appendChild(input);
 		return cell;
 	}
-	
+
 	if(columnName === "Request Date"){
 		var input = document.createElement("input");
 		input.setAttribute("type","date");
@@ -1650,7 +1847,7 @@ function create_table_cell(columnName, table_id, row) {
 		cell.appendChild(input);
 		return cell;
 	}	
-	
+
 	if(columnName === ""){
 		// Remove button column
 		var removeBtn = document.createElement("button");
@@ -1666,7 +1863,7 @@ function create_table_cell(columnName, table_id, row) {
 		cell.appendChild(removeBtn);
 		return cell;
 	}
-	
+
 	// Default: regular input field (Item, Uom, etc.)
 	var input = document.createElement("input");
 	input.className = "input_no_border";
@@ -1678,13 +1875,13 @@ function add_line_to_order(table_id){
 	var table = document.getElementById(table_id);
 	var headerRow = table.rows[0];
 	var row = table.insertRow(-1);
-	
+
 	// Get column names from header row
 	var columnNames = [];
 	for(let i = 0; i < headerRow.cells.length; i++){
 		columnNames.push(headerRow.cells[i].textContent.trim());
 	}
-	
+
 	// Create cells using the same logic as create_table
 	for(let i = 0; i < columnNames.length; i++){
 		var cell = create_table_cell(columnNames[i], table_id, row);
@@ -1713,58 +1910,58 @@ function clear_order_screen(event){
 	if(event === undefined){
 		switch(root.id){
 			case "new-order-menu":
-			{
-				root.style.display = "none";
-				root.setAttribute("id","hidden-new-order-menu");
-				var btn = document.getElementById("back");
-				btn.textContent ="New Order";
-				btn.setAttribute("id", "new-order");
-				btn.removeEventListener("click",clear_order_screen);
-				btn.addEventListener("click",render_new_order);
-				var btn2 = document.getElementById("edit-order");
-				btn2.style.display = null;
-				break;
-			}
+				{
+					root.style.display = "none";
+					root.setAttribute("id","hidden-new-order-menu");
+					var btn = document.getElementById("back");
+					btn.textContent ="New Order";
+					btn.setAttribute("id", "new-order");
+					btn.removeEventListener("click",clear_order_screen);
+					btn.addEventListener("click",render_new_order);
+					var btn2 = document.getElementById("edit-order");
+					btn2.style.display = null;
+					break;
+				}
 			case "edit-order-menu":
-			{
-				root.style.display = "none";
-				root.setAttribute("id","hidden-edit-order-menu");
-				var btn = document.getElementById("back");
-				btn.textContent ="Edit Order";
-				btn.setAttribute("id", "edit-order");
-				btn.removeEventListener("click",clear_order_screen);
-				btn.addEventListener("click",render_edit_order);
-				var btn2 = document.getElementById("new-order");
-				btn2.style.display = null;
-				break;
-			}
+				{
+					root.style.display = "none";
+					root.setAttribute("id","hidden-edit-order-menu");
+					var btn = document.getElementById("back");
+					btn.textContent ="Edit Order";
+					btn.setAttribute("id", "edit-order");
+					btn.removeEventListener("click",clear_order_screen);
+					btn.addEventListener("click",render_edit_order);
+					var btn2 = document.getElementById("new-order");
+					btn2.style.display = null;
+					break;
+				}
 			case "root-new-customer":
-			{
-				root.style.display = "none";
-				root.setAttribute("id","hidden-root-new-customer");
-				var btn = document.getElementById("back");
-				btn.textContent ="New Customer";
-				btn.setAttribute("id", "new-cust");
-				btn.removeEventListener("click",clear_order_screen);
-				btn.addEventListener("click",render_new_customer);
-				var btn2 = document.getElementById("edit-cust");
-				btn2.style.display = null;
-				break;
-			}
+				{
+					root.style.display = "none";
+					root.setAttribute("id","hidden-root-new-customer");
+					var btn = document.getElementById("back");
+					btn.textContent ="New Customer";
+					btn.setAttribute("id", "new-cust");
+					btn.removeEventListener("click",clear_order_screen);
+					btn.addEventListener("click",render_new_customer);
+					var btn2 = document.getElementById("edit-cust");
+					btn2.style.display = null;
+					break;
+				}
 
 			case "root-edit-customer":
-			{
-				root.style.display = "none";
-				root.setAttribute("id","hidden-root-edit-customer");
-				var btn = document.getElementById("back");
-				btn.textContent ="Edit Customer";
-				btn.setAttribute("id", "edit-cust");
-				btn.removeEventListener("click",clear_order_screen);
-				btn.addEventListener("click",render_edit_customer);
-				var btn2 = document.getElementById("new-cust");
-				btn2.style.display = null;
-				break;
-			}
+				{
+					root.style.display = "none";
+					root.setAttribute("id","hidden-root-edit-customer");
+					var btn = document.getElementById("back");
+					btn.textContent ="Edit Customer";
+					btn.setAttribute("id", "edit-cust");
+					btn.removeEventListener("click",clear_order_screen);
+					btn.addEventListener("click",render_edit_customer);
+					var btn2 = document.getElementById("new-cust");
+					btn2.style.display = null;
+					break;
+				}
 			default:
 				break;
 		}
@@ -1772,58 +1969,58 @@ function clear_order_screen(event){
 	}else if(event.type === 'click'){
 		switch(root.id){
 			case "new-order-menu":
-			{
-				root.style.display = "none";
-				root.setAttribute("id","hidden-new-order-menu");
-				var btn = document.getElementById("back");
-				btn.textContent ="New Order";
-				btn.setAttribute("id", "new-order");
-				btn.removeEventListener("click",clear_order_screen);
-				btn.addEventListener("click",render_new_order);
-				var btn2 = document.getElementById("edit-order");
-				btn2.style.display = null;
-				break;
-			}
+				{
+					root.style.display = "none";
+					root.setAttribute("id","hidden-new-order-menu");
+					var btn = document.getElementById("back");
+					btn.textContent ="New Order";
+					btn.setAttribute("id", "new-order");
+					btn.removeEventListener("click",clear_order_screen);
+					btn.addEventListener("click",render_new_order);
+					var btn2 = document.getElementById("edit-order");
+					btn2.style.display = null;
+					break;
+				}
 			case "edit-order-menu":
-			{
-				root.style.display = "none";
-				root.setAttribute("id","hidden-edit-order-menu");
-				var btn = document.getElementById("back");
-				btn.textContent ="Edit Order";
-				btn.setAttribute("id", "edit-order");
-				btn.removeEventListener("click",clear_order_screen);
-				btn.addEventListener("click",render_edit_order);
-				var btn2 = document.getElementById("new-order");
-				btn2.style.display = null;
-				break;
-			}
+				{
+					root.style.display = "none";
+					root.setAttribute("id","hidden-edit-order-menu");
+					var btn = document.getElementById("back");
+					btn.textContent ="Edit Order";
+					btn.setAttribute("id", "edit-order");
+					btn.removeEventListener("click",clear_order_screen);
+					btn.addEventListener("click",render_edit_order);
+					var btn2 = document.getElementById("new-order");
+					btn2.style.display = null;
+					break;
+				}
 			case "root-new-customer":
-			{
-				root.style.display = "none";
-				root.setAttribute("id","hidden-root-new-customer");
-				var btn = document.getElementById("back");
-				btn.textContent ="New Customer";
-				btn.setAttribute("id", "new-cust");
-				btn.removeEventListener("click",clear_order_screen);
-				btn.addEventListener("click",render_new_customer);
-				var btn2 = document.getElementById("edit-cust");
-				btn2.style.display = null;
-				break;
-			}
+				{
+					root.style.display = "none";
+					root.setAttribute("id","hidden-root-new-customer");
+					var btn = document.getElementById("back");
+					btn.textContent ="New Customer";
+					btn.setAttribute("id", "new-cust");
+					btn.removeEventListener("click",clear_order_screen);
+					btn.addEventListener("click",render_new_customer);
+					var btn2 = document.getElementById("edit-cust");
+					btn2.style.display = null;
+					break;
+				}
 
 			case "root-edit-customer":
-			{
-				root.style.display = "none";
-				root.setAttribute("id","hidden-root-edit-customer");
-				var btn = document.getElementById("back");
-				btn.textContent ="Edit Customer";
-				btn.setAttribute("id", "edit-cust");
-				btn.removeEventListener("click",clear_order_screen);
-				btn.addEventListener("click",render_edit_customer);
-				var btn2 = document.getElementById("new-cust");
-				btn2.style.display = null;
-				break;
-			}
+				{
+					root.style.display = "none";
+					root.setAttribute("id","hidden-root-edit-customer");
+					var btn = document.getElementById("back");
+					btn.textContent ="Edit Customer";
+					btn.setAttribute("id", "edit-cust");
+					btn.removeEventListener("click",clear_order_screen);
+					btn.addEventListener("click",render_edit_customer);
+					var btn2 = document.getElementById("new-cust");
+					btn2.style.display = null;
+					break;
+				}
 			default:
 				break;
 		}
@@ -1837,7 +2034,7 @@ function clear_order_screen(event){
 			var tbl_totals = document.getElementsByClassName("tot");
 			var tbl_discs = document.getElementsByClassName("disc");
 			var tbl_prices = document.getElementsByClassName("price");
-			
+
 			var ask = false;
 			for(let i = 0; i < tbl_qtys.length;i++){
 				if(tbl_qtys[i].value != 0) ask = true;
@@ -1992,7 +2189,7 @@ async function submit_order(crud_op,value,from_table){
 
 	//console.log(Array.isArray(lines));
 	//console.log(lines.length);
-	
+
 	let lines_count = lines.length;
 	let orders_header = remove_null_values({
 		date: date.textContent === "" ? null : date.textContent,
