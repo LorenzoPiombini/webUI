@@ -45,6 +45,12 @@ function setupKeyboardNavigation() {
 			case '4':
 				targetUrl = 'account_payable.html';
 				break;
+			case '5':
+				targetUrl = 'general_ledger.html';
+				break;
+			case '6':
+				targetUrl = 'customers.html';
+				break;
 			default:
 				return; // Not our shortcut, do nothing
 		}
@@ -715,16 +721,20 @@ function check_input(){
 			option.className = "dropdown-option";
 
 			option.addEventListener("click",async () =>{
+				input = document.getElementById("cust-id")
 				input.value = customer;
 				clearDropdown();
-				/*get the customer selected by the users*/
-				let response = await send(null,"GET",`customers/${customer}`);
 
-				/*TODO: remove this when you ready*/
-				console.log(JSON.stringify(response.message));
+
 
 				var root = document.getElementById("root-edit-customer");
 				if(root){
+
+					/*get the customer selected by the users*/
+					let response = await send(null,"GET",`customers/${customer}`);
+					/*TODO: remove this when you ready*/
+					console.log(JSON.stringify(response.message));
+						
 					/*create layout customer*/
 					// Basic Information Section
 					var basicSection = document.createElement("div");
@@ -918,6 +928,24 @@ function check_input(){
 					root.appendChild(addressSection);
 				}else{
 					/*Here you are in the new sales order menu*/
+
+					/*get the customer selected by the users*/
+					let response = await send(null,"GET",`sales_new_order_customers/${customer}`);
+					/*TODO: remove this when you ready*/
+					console.log(JSON.stringify(response.message));
+
+					//TODO: prepopulate the form if the response contain the fields
+					if(response.message.price_level_id != undefined){
+						var input = document.getElementById("price-level");
+						if(input){
+							input.value = response.message.price_level_id;
+						}
+						input = document.getElementById("order-disc");
+						if(input){
+							if(response.message.percentage != undefined)
+								input.value = response.message.percentage;
+						}
+					}
 					/*
 					if(response.message.on_credit_hold != undefined){
 						if(response.message.on_credit_hold == 1){
@@ -957,6 +985,7 @@ async function get_orders(){
 
 
 async function get_customers(){
+
 	const response = await send(null,"GET","customers");	
 	customers_list = response.message;
 
@@ -967,6 +996,27 @@ async function get_customers(){
 }
 
 function render_edit_order(){
+
+
+
+
+	var root = document.getElementById("hidden-edit-order-menu");
+	if(root){
+		/*make it visibile*/
+		var bt = document.getElementById("edit-order");
+		bt.setAttribute("id","back");
+		bt.textContent = "Back";
+		bt.removeEventListener("click",render_edit_order);
+		bt.addEventListener("click",clear_order_screen);
+
+		var bt2 = document.getElementById("new-order");
+		bt2.style.display = "none";
+
+		root.setAttribute("id","edit-order-menu");
+		root.style.display = null;
+		return; 
+	}
+
 	var btn = document.getElementById("edit-order");
 	btn.textContent = "Back";
 	btn.setAttribute("id","back");
@@ -1138,7 +1188,6 @@ function render_new_customer(){
 	c_hdq_id_input.setAttribute("id","cust-hd-id");
 	c_hdq_id_input.setAttribute("type","text");
 	c_hdq_id_input.title = "Use an existing customer if this is just another shipping address";
-	c_hdq_id_input.addEventListener("focus",get_customers);
 	c_hdq_id_group.appendChild(c_hdq_id_lbl);
 	c_hdq_id_group.appendChild(c_hdq_id_input);
 	basicGrid.appendChild(c_hdq_id_group);
@@ -1692,14 +1741,11 @@ function render_new_order(){
 		// Minimal scroll - only scroll if form is not visible
 		var formRect = d.getBoundingClientRect();
 		var isVisible = formRect.top >= 0 && formRect.top < window.innerHeight;
+		window.scrollBy({
+			top: 350,
+			behavior: 'smooth'
+		});
 
-		if (!isVisible) {
-			d.scrollIntoView({ 
-				behavior: 'smooth', 
-				block: 'nearest',
-				inline: 'nearest'
-			});
-		}
 	}, 200);
 
 	var btn = document.getElementById("new-order");
@@ -1825,6 +1871,7 @@ function create_table_cell(columnName, table_id, row) {
 		input.setAttribute("min",0);
 		input.setAttribute("max",100);
 		input.classList.add("disc","input_no_border");
+		input.setAttribute("id","order-disc");
 		input.value = 0.00;
 		cell.appendChild(input);
 		return cell;
@@ -2235,7 +2282,9 @@ async function submit_new_customer(){
 	var cust_warehouse= "";
 	var cust_terms= "";
 	var cust_credit_limit= "";
+	var cust_price_level_id = "";
 	inputs.forEach((input) =>{
+		if(input.id === "main-pr-level") cust_price_level_id = input.value;
 		if(input.id === "new-customer-name") cust_name = input.value;
 		if(input.id === "cust-id") cust_id = input.value;
 		if(input.id === "addr1") cust_addr1 = input.value;
@@ -2263,7 +2312,8 @@ async function submit_new_customer(){
 		phone: cust_phone === "" ? null : cust_phone,
 		c_terms: cust_terms === "" ? null : cust_terms,
 		c_limits: cust_credit_limit === "" ? null : cust_credit_limit,
-		c_whse_number: cust_warehouse === "" ? null : cust_warehouse
+		c_whse_number: cust_warehouse === "" ? null : cust_warehouse,
+		price_level_id : cust_price_level_id === "" ? null : cust_price_level_id
 	});
 
 	const json_payload = JSON.stringify(cust_payload);
