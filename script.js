@@ -4,6 +4,14 @@ import send from './net.js'
 /*SET ACTIVE NAVIGATION LINK*/
 function setActiveNavLink() {
 	const currentPath = window.location.pathname;
+
+	if(currentPath.includes("sales_order")){
+		//TODO: 
+		//	-1) check if there is data in the form
+		//	-2) ask user if they want to save the order, o if they want to lose the data. 
+		localStorage.removeItem('customer_order');
+	}
+
 	const navLinks = document.querySelectorAll('.sidenav a');
 	
 	navLinks.forEach(link => {
@@ -357,7 +365,7 @@ function create_table(row,column_name,id_value){
 		}else{
 			// Create first data row using the same helper function as add_line_to_order
 			for(let k = 0; k < column_name.length;k++){
-				var cell = create_table_cell(column_name[k], id_value, r);
+				var cell = create_table_cell(column_name[k], id_value, row);
 				r.appendChild(cell);
 			}
 		}
@@ -931,8 +939,7 @@ function check_input(){
 
 					/*get the customer selected by the users*/
 					let response = await send(null,"GET",`sales_new_order_customers/${customer}`);
-					/*TODO: remove this when you ready*/
-					console.log(JSON.stringify(response.message));
+					localStorage.setItem('customer_order',JSON.stringify(response.message));
 
 					//TODO: prepopulate the form if the response contain the fields
 					if(response.message.price_level_id != undefined){
@@ -940,11 +947,12 @@ function check_input(){
 						if(input){
 							input.value = response.message.price_level_id;
 						}
-						input = document.getElementById("order-disc");
-						if(input){
-							if(response.message.percentage != undefined)
-								input.value = response.message.percentage;
-						}
+						var elements = document.querySelectorAll('[id*="order-disc-"]');
+						elements.forEach((e) =>{
+							if(e.tagName === 'INPUT')
+								if(response.message.percentage != undefined)
+									e.value = response.message.percentage;
+						});
 					}
 					/*
 					if(response.message.on_credit_hold != undefined){
@@ -1846,7 +1854,7 @@ function remove_table_row(row, table_id) {
 }
 
 // Helper function to create a table cell based on column type
-function create_table_cell(columnName, table_id, row) {
+function create_table_cell(columnName, table_id, row,row_index) {
 	var cell = document.createElement("td");
 
 	if(columnName === "Total"){
@@ -1865,14 +1873,22 @@ function create_table_cell(columnName, table_id, row) {
 		cell.appendChild(input);
 		return cell;
 	}
+
 	if(columnName === "Disc"){
 		var input = document.createElement("input");
 		input.setAttribute("type","number");
+		input.setAttribute("step","0.01");
 		input.setAttribute("min",0);
 		input.setAttribute("max",100);
 		input.classList.add("disc","input_no_border");
-		input.setAttribute("id","order-disc");
-		input.value = 0.00;
+		input.setAttribute("id",`order-disc-${row_index}`);
+		var data;
+		if((data = JSON.parse(localStorage.getItem('customer_order')))){
+			if(data.percentage != undefined)
+				input.value = data.percentage;
+		}else{
+			input.value = 0.00;
+		}
 		cell.appendChild(input);
 		return cell;
 	}
@@ -1920,6 +1936,7 @@ function create_table_cell(columnName, table_id, row) {
 
 function add_line_to_order(table_id){
 	var table = document.getElementById(table_id);
+	var row_index = table.rows.length - 1;
 	var headerRow = table.rows[0];
 	var row = table.insertRow(-1);
 
@@ -1931,7 +1948,7 @@ function add_line_to_order(table_id){
 
 	// Create cells using the same logic as create_table
 	for(let i = 0; i < columnNames.length; i++){
-		var cell = create_table_cell(columnNames[i], table_id, row);
+		var cell = create_table_cell(columnNames[i], table_id, row,row_index);
 		row.appendChild(cell);
 	}
 }
