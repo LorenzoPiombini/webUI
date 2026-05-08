@@ -393,22 +393,19 @@ function clearDropdown() {
 
 let orders_list;
 let customers_list;
-function check_input(){ 
+let items_list;
+function check_input(event){ 
 	var cust = false;
 	var s_ord = false;
+	var items = false;
 	
-	var input;
+	var input = event.target;
 	var page = document.URL;
 	if(page.includes('sales_orders')){
-		input = document.getElementById("cust-id");		
-		cust = true;
-		if(input == null){
-			cust = false;
-			s_ord = true;
-			input = document.getElementById("edit-cust-id");
-		}
+		cust = event.target.id === "cust-id";
+		s_ord = event.target.id === "edit-cust-id";
+		items = event.target.id.includes('sales-order-item');
 	}else if(page.includes('customers')){
-		input = document.getElementById("cust-id");		
 		cust = true;
 	}
 
@@ -422,6 +419,8 @@ function check_input(){
 		matched = customers_list.filter((customer) => customer.toLowerCase().includes(value.toLowerCase()));
 	}else if(s_ord){
 		matched = orders_list.filter(order =>order.toString().includes(value)).slice(0, 20);
+	}else if(items){
+		matched = items_list.filter((item) => item.toLowerCase().includes(value.toLowerCase()));
 	}
 
 	if (matched.length === 0) return;
@@ -949,9 +948,12 @@ function check_input(){
 						}
 						var elements = document.querySelectorAll('[id*="order-disc-"]');
 						elements.forEach((e) =>{
-							if(e.tagName === 'INPUT')
-								if(response.message.percentage != undefined)
-									e.value = response.message.percentage;
+							if(e.tagName === 'INPUT'){
+								if(e.tagName.value !== "0"){
+									if(response.message.percentage != undefined)
+										e.value = response.message.percentage;
+								}
+							}
 						});
 					}
 					/*
@@ -962,8 +964,42 @@ function check_input(){
 							return;
 						}
 					}
-				*/
+					*/
 				}
+			});
+			dropdown.appendChild(option);
+		});
+	}else if(items){
+		matched.forEach(item => {
+			const option = document.createElement("div");
+			option.textContent = item;
+			option.className = "dropdown-option";
+
+			option.addEventListener("click", async () => {
+				input.value = item;
+				clearDropdown();
+
+				/*get the item selected by the users*/
+				let response = await send(null,"GET",`items/${item}`);
+
+				console.log(JSON.stringify(response.message))
+				/*populate the table price and uom*/
+				
+				const id_row = input.id;
+				var number = id_row.match("/\d/g");
+				if(number){
+					var price = document.getElementById(`price-${number}`);
+					price.value = Number(response.message.unit_price);
+					var uom = document.getElementById(`uom-${number}`); 
+					uom.value = response.message.uom;
+				}else{
+					var price = document.getElementById("price");
+					price.value = Number(response.message.unit_price);
+					var uom = document.getElementById("uom"); 
+					uom.value = response.message.uom;
+				}
+
+
 			});
 			dropdown.appendChild(option);
 		});
@@ -992,8 +1028,17 @@ async function get_orders(){
 }
 
 
-async function get_customers(){
+async function get_items(event){
+	const response = await send(null,"GET","items");	
+	items_list = response.message;
 
+	console.log(items_list);
+	var input = event.target;
+	input.removeEventListener("focus",get_items);
+	input.addEventListener("input",check_input);
+}
+
+async function get_customers(event){
 	const response = await send(null,"GET","customers");	
 	customers_list = response.message;
 
@@ -1004,9 +1049,6 @@ async function get_customers(){
 }
 
 function render_edit_order(){
-
-
-
 
 	var root = document.getElementById("hidden-edit-order-menu");
 	if(root){
@@ -1897,6 +1939,12 @@ function create_table_cell(columnName, table_id, row,row_index) {
 		var input = document.createElement("input");
 		input.setAttribute("type","number");
 		input.setAttribute("step","0.01");
+		if(row_index == undefined){
+			input.setAttribute("id",`price`);
+		}else{
+			input.setAttribute("id",`price-${row_index}`);
+		}
+
 		input.classList.add("price","input_no_border");
 		input.value = 0.00;
 		cell.appendChild(input);
@@ -1930,6 +1978,21 @@ function create_table_cell(columnName, table_id, row,row_index) {
 	// Default: regular input field (Item, Uom, etc.)
 	var input = document.createElement("input");
 	input.className = "input_no_border";
+	if(columnName === "Item"){
+		input.addEventListener("click",get_items);
+		if(row_index == undefined){
+			input.setAttribute("id",`sales-order-item-`)
+		}else{
+			input.setAttribute("id",`sales-order-item-${row_index}`)
+		}
+	}
+	if(columnName === "Uom"){
+		if(row_index == undefined){
+			input.setAttribute("id","uom")
+		}else{
+			input.setAttribute("id",`uom-${row_index}`)
+		}
+	}
 	cell.appendChild(input);
 	return cell;
 }
