@@ -986,7 +986,8 @@ function check_input(event){
 				/*populate the table price and uom*/
 				
 				const id_row = input.id;
-				var number = id_row.match("/\d/g");
+				const number = id_row.match(/\d+/);
+				console.log(number);
 				if(number){
 					var price = document.getElementById(`price-${number}`);
 					price.value = Number(response.message.unit_price);
