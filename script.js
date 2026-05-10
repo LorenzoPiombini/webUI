@@ -2262,21 +2262,46 @@ function get_table_data(table_id){
 		Array.from(rows[i].children).forEach((cell, index) =>{
 			Array.from(cell.children).forEach(child =>{
 				if(child.value !== "" && child.value !== "0" && child.value != undefined){
-					if(child.classList.contains("qty") 	|| 
-						child.classList.contains("tot") 	||
-						child.classList.contains("price") 	|| 
-						child.classList.contains("disc") 	){
+					if(child.classList.contains("qty") 
+					 	|| child.classList.contains("tot") 
+						|| child.classList.contains("price") 
+						|| child.classList.contains("disc")){
 
 						if(isNaN(Number(child.value))){
-							error = true;
+							if(child.classList.contains("qty")){
+								error = "qty";
+							}else{
+								error = false;
+							}
+						}
+						if(!child.classList.contains("tot")
+							&& !child.classList.contains("disc")
+							&& !child.classList.contains("price")){
+							row_obj[headers[index].toLowerCase().replace(" ","_")] = child.value;
 						}
 					}
-					row_obj[headers[index].toLowerCase().replace(" ","_")] = child.value;
 				}
 
-				if(child.textContent !== ""){
+				if(child.classList.contains("qty") && child.value === "0"){
+					error = "qty";
+				}
+
+				if(child.classList.contains("rdate")){
+					if(child.value === ""){
+						alert("A request date is reqired!");
+						error = "date";
+					}
+
+				}
+
+				if(child.textContent !== "" 
+					&& !child.classList.contains("tot")){
 					var n = child.textContent.split(" ");
 					row_obj[headers[index].toLowerCase()] = n[1];
+				}
+
+				if(child.value !== "" && child.id.includes("item")){
+					row_obj[`${headers[index].toLowerCase()}_id`] = child.value;
 				}
 			});
 		});
@@ -2287,7 +2312,11 @@ function get_table_data(table_id){
 	}
 
 
-	if(error){
+	if(error === "date"){
+		data = { "date":"error"};
+	} else if(error === "qty"){
+		data = { "qty":"error"};
+	}else if(error){
 		data = null;
 	}
 	return data;
@@ -2303,12 +2332,17 @@ async function submit_order(crud_op,value,from_table){
 	if(lines == null){
 		alert("check the input, one or more fields have inllegal values")
 		return;
+	}else if(lines.date === "error"){
+		return;	
+	}else if(lines.qty === "error"){
+		alert("order quantity must be atleast 1!");
+		return;
 	}
+
 	if(Object.keys(lines).length == 0){
 		if(crud_op == "new"){
 			alert("cannot add an empty order");
 		}else{
-
 			alert("cannot update this order, do you want to delete it?");
 		}
 
@@ -2322,7 +2356,7 @@ async function submit_order(crud_op,value,from_table){
 	let orders_header = remove_null_values({
 		date: date.textContent === "" ? null : date.textContent,
 		customer_id: cust_id.value === "" ? null : cust_id.value,
-		price_level: price_level.value === "" ? null : price_level.value,
+		price_level_id: price_level.value === "" ? null : price_level.value,
 		lines_nr : `${lines_count}` 
 	});
 
