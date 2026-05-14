@@ -196,7 +196,6 @@ async function loadDashboardOrders() {
 	try {
 		// you have to create an end point in the C backend it will not be sales_orders 
 		const salesResponse = await send(null, "GET", "sales_orders");
-		console.log(salesResponse.message);
 		if (salesResponse && salesResponse.message && !salesResponse.message.includes("there are no orders")) {
 			displaySalesOrdersThisWeek(salesResponse.message, weekRange);
 		} else {
@@ -223,7 +222,7 @@ async function loadDashboardOrders() {
 	}
 }
 
-function displaySalesOrdersThisWeek(orders, weekRange) {
+async function displaySalesOrdersThisWeek(orders, weekRange) {
 	const container = document.getElementById("sales-orders-week");
 	
 	if (!orders || orders.length === 0) {
@@ -231,13 +230,21 @@ function displaySalesOrdersThisWeek(orders, weekRange) {
 		return;
 	}
 	
+	console.log("here")
+	console.log(orders)
 	// Filter orders by request date within this week
 	const weekOrders = [];
-	orders.forEach(orderId => {
-		// We'll need to fetch order details to check request dates
-		// For now, just show all orders - you can enhance this by fetching each order's details
-		weekOrders.push(orderId);
-	});
+	for(let i = 0; i < orders.length; i++){
+		const response = await send(null,"GET",`sales_orders/${orders[i]}`);	
+		console.log(JSON.stringify(response.message));
+		for(let j = 1; j < Number(response.message.sales_orders_head.lines_nr) + 1; j++){
+			if(isDateInWeek(response.message.sales_orders_lines[`line_${j}`].request_date,weekRange.start,weekRange.end)){
+				// For now, just show all orders - you can enhance this by fetching each order's details
+				if(!weekOrders.includes(orders[i]))
+					weekOrders.push(orders[i]);
+			}
+		}
+	}
 	
 	if (weekOrders.length === 0) {
 		container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">No sales orders to ship this week.</p>';
