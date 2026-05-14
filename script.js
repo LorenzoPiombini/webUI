@@ -2032,7 +2032,7 @@ function add_line_to_order(table_id){
 
 	// Create cells using the same logic as create_table
 	for(let i = 0; i < columnNames.length; i++){
-		var cell = create_table_cell(columnNames[i], table_id, row,row_index,true);
+		var cell = create_table_cell(columnNames[i], table_id, row,row_index,event === undefined ? false : true);
 		row.appendChild(cell);
 	}
 }
