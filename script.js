@@ -10,6 +10,7 @@ function setActiveNavLink() {
 		//	-1) check if there is data in the form
 		//	-2) ask user if they want to save the order, o if they want to lose the data. 
 		localStorage.removeItem('customer_order');
+		localStorage.removeItem('edit_order_data');
 	}
 
 	const navLinks = document.querySelectorAll('.sidenav a');
@@ -365,7 +366,7 @@ function create_table(row,column_name,id_value){
 		}else{
 			// Create first data row using the same helper function as add_line_to_order
 			for(let k = 0; k < column_name.length;k++){
-				var cell = create_table_cell(column_name[k], id_value, row);
+				var cell = create_table_cell(column_name[k], id_value, row,i,id_value === "edit-order-table" ? false:true);
 				r.appendChild(cell);
 			}
 		}
@@ -448,7 +449,6 @@ function check_input(event){
 				/*this fetch the order selected from the server*/
 				let response = await send(null,"GET",`sales_orders/${order}`);
 
-				console.log(`${JSON.stringify(response.message)}`);
 				/*if there is a table already, destroy it and make a new one */
 				/*create the order form populated with the order sales from the back end selected*/
 				if(response.message == undefined){
@@ -460,10 +460,11 @@ function check_input(event){
 				}			
 				var d = document.getElementById("edit-order-menu");
 
-				var br = document.createElement("br");
-				d.appendChild(br);
+				//var br = document.createElement("br");
+				//d.appendChild(br);
 
-				console.log(`${JSON.stringify(response.message)}`);
+				console.log(JSON.stringify(response.message));
+				localStorage.setItem('edit_order_data',JSON.stringify(response.message));
 				var el = document.getElementById("cust-id");
 				if(el != null){
 
@@ -474,8 +475,8 @@ function check_input(event){
 					}
 
 					var price_lvl = document.getElementById("price-level");
-					if(response.message.sales_orders_head.price_level != undefined){
-						price_lvl.value = response.message.sales_orders_head.price_level;
+					if(response.message.sales_orders_head.price_level_id != undefined){
+						price_lvl.value = response.message.sales_orders_head.price_level_id;
 					}else{
 						price_lvl.value = "";
 					}
@@ -485,8 +486,6 @@ function check_input(event){
 						date.textContent = response.message.sales_orders_head.date;
 					}
 
-					var old_edit = document.getElementById("edit");
-					old_edit.remove();
 
 					var edit = document.createElement("button");
 					edit.textContent = "Edit";
@@ -515,20 +514,20 @@ function check_input(event){
 
 						Array.from(rows[i].children).forEach((cell,index)=>{
 							if(index == 0){
-								if(response.message.sales_orders_lines[access_line_name].item != undefined){
-									cell.children[0].value = response.message
-										.sales_orders_lines[access_line_name].item;
+								if(response.message.sales_orders_lines[access_line_name].item_id != undefined){
+									cell.children[index].value = response.message
+										.sales_orders_lines[access_line_name].item_id;
 								}else{
-									cell.children[0].value ="";
+									cell.children[index].value ="";
 
 								}
 							}
 							if(index == 1){
 								if(response.message.sales_orders_lines[access_line_name].uom != undefined){
-									cell.children[0].value = response.message
+									cell.children[index].value = response.message
 										.sales_orders_lines[access_line_name].uom;
 								}else{
-									cell.children[0].value = "";
+									cell.children[index].value = "";
 								}
 							}
 							Array.from(cell.children).forEach(child =>{
@@ -603,8 +602,8 @@ function check_input(event){
 				price_level.className = "input_2px_border";
 				price_level.setAttribute("id","price-level");
 
-				if(response.message.sales_orders_head.price_level != null){
-					price_level.value = response.message.sales_orders_head.price_level;
+				if(response.message.sales_orders_head.price_level_id != null){
+					price_level.value = response.message.sales_orders_head.price_level_id;
 				}
 
 				d.appendChild(price_level);
@@ -659,7 +658,7 @@ function check_input(event){
 				var tbl = document.getElementById("edit-order-table");
 				var rows = tbl.rows;
 				if((rows.length - 1) < Number(response.message.sales_orders_head.lines_nr)){
-					for(let i = 0; i < Number(response.message.sales_orders_head.lines_nr) - (rows.length-1);i++){
+					for(let i = 0; i < Number(response.message.sales_orders_head.lines_nr) -1;i++){
 						add_line_to_order("edit-order-table");		
 					}
 				}
@@ -669,9 +668,9 @@ function check_input(event){
 					var access_line_name = `line_${i}`;
 					Array.from(rows[i].children).forEach((cell,index)=>{
 						if(index == 0){
-							if(response.message.sales_orders_lines[access_line_name].item != undefined){
+							if(response.message.sales_orders_lines[access_line_name].item_id != undefined){
 								cell.children[0].value = response.message
-									.sales_orders_lines[access_line_name].item;
+									.sales_orders_lines[access_line_name].item_id;
 							}
 						}
 						if(index == 1){
@@ -938,6 +937,8 @@ function check_input(event){
 
 					/*get the customer selected by the users*/
 					let response = await send(null,"GET",`sales_new_order_customers/${customer}`);
+
+					/*save data in the browser storage*/
 					localStorage.setItem('customer_order',JSON.stringify(response.message));
 
 					//TODO: prepopulate the form if the response contain the fields
@@ -1897,7 +1898,7 @@ function remove_table_row(row, table_id) {
 }
 
 // Helper function to create a table cell based on column type
-function create_table_cell(columnName, table_id, row,row_index) {
+function create_table_cell(columnName, table_id, row, row_index, set_item_getter) {
 	var cell = document.createElement("td");
 
 	if(columnName === "Total"){
@@ -1926,11 +1927,20 @@ function create_table_cell(columnName, table_id, row,row_index) {
 		input.classList.add("disc","input_no_border");
 		input.setAttribute("id",`order-disc-${row_index}`);
 		var data;
-		if((data = JSON.parse(localStorage.getItem('customer_order')))){
-			if(data.percentage != undefined)
-				input.value = data.percentage;
-		}else{
-			input.value = 0.00;
+		if(table_id !== "edit-order-table"){
+			if((data = JSON.parse(localStorage.getItem('customer_order')))){
+				if(data.percentage != undefined)
+					input.value = data.percentage;
+			}else{
+				input.value = 0.00;
+			}
+		} else{
+			if((data = JSON.parse(localStorage.getItem('edit_order_data')))){
+				if(data.sales_orders_lines.line_1.disc != undefined)
+					input.value = data.sales_orders_lines.line_1.disc;
+			}else{
+				input.value = 0.00;
+			}
 		}
 		cell.appendChild(input);
 		return cell;
@@ -1980,7 +1990,10 @@ function create_table_cell(columnName, table_id, row,row_index) {
 	var input = document.createElement("input");
 	input.className = "input_no_border";
 	if(columnName === "Item"){
-		input.addEventListener("click",get_items);
+		if(set_item_getter){
+			input.addEventListener("click",get_items);
+		}
+
 		if(row_index == undefined){
 			input.setAttribute("id",`sales-order-item-`)
 		}else{
@@ -2000,7 +2013,7 @@ function create_table_cell(columnName, table_id, row,row_index) {
 
 function add_line_to_order(table_id){
 	var table = document.getElementById(table_id);
-	var row_index = table.rows.length - 1;
+	var row_index = table.rows.length;
 	var headerRow = table.rows[0];
 	var row = table.insertRow(-1);
 
@@ -2012,7 +2025,7 @@ function add_line_to_order(table_id){
 
 	// Create cells using the same logic as create_table
 	for(let i = 0; i < columnNames.length; i++){
-		var cell = create_table_cell(columnNames[i], table_id, row,row_index);
+		var cell = create_table_cell(columnNames[i], table_id, row,row_index,true);
 		row.appendChild(cell);
 	}
 }
@@ -2290,6 +2303,8 @@ function get_table_data(table_id){
 					if(child.value === ""){
 						alert("A request date is reqired!");
 						error = "date";
+					}else{
+						row_obj[headers[index].toLowerCase().replace(" ","_")] = child.value;
 					}
 
 				}
