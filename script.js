@@ -1891,13 +1891,14 @@ function compute_total(event) {
 }
 
 
-function remove_table_row(row, table_id) {
+function remove_table_row(event,table_id) {
 	var table = document.getElementById(table_id);
 	if (table.rows.length <= 2) {
 		// Don't remove if it's the last data row
 		alert("You must have at least one line in the order.");
 		return;
 	}
+	var row = event.target.closest('tr');
 	row.remove();
 	// Recalculate totals after removing a row
 	var event = new Event('change');
@@ -1986,8 +1987,8 @@ function create_table_cell(columnName, table_id, row, row_index, set_item_getter
 		removeBtn.style.padding = "var(--spacing-xs) var(--spacing-sm)";
 		removeBtn.style.minWidth = "auto";
 		removeBtn.setAttribute("type","button");
-		removeBtn.addEventListener("click", function() {
-			remove_table_row(row, table_id);
+		removeBtn.addEventListener("click", function(event) {
+			remove_table_row(event,table_id);
 		});
 		cell.appendChild(removeBtn);
 		return cell;
