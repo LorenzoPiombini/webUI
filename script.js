@@ -472,7 +472,7 @@ function check_input(event){
 
 				console.log(JSON.stringify(response.message));
 				localStorage.setItem('edit_order_data',JSON.stringify(response.message));
-				var el = document.getElementById("cust-id");
+				var el = d.querySelector("#cust-id");
 				if(el != null){
 
 					if(response.message.sales_orders_head.customer_id != undefined){
@@ -481,27 +481,42 @@ function check_input(event){
 						el.value = "";
 					}
 
-					var price_lvl = document.getElementById("price-level");
+					var price_lvl = d.querySelector("#price-level");
 					if(response.message.sales_orders_head.price_level_id != undefined){
 						price_lvl.value = response.message.sales_orders_head.price_level_id;
 					}else{
 						price_lvl.value = "";
 					}
 
-					var date = document.getElementById("date");
-					if(response.message.sales_orders_head.date != undefined){
-						date.textContent = response.message.sales_orders_head.date;
+					var date = d.querySelector("#date");
+					if(date == null){
+						date = document.createElement("label");
+						date.setAttribute("id","date");
+						date.setAttribute("style","font-size:24px;");
+						date.textContent = response.message.sales_orders_head.date;	
+						d.appendChild(date);
+					}else{
+
+						if(response.message.sales_orders_head.date != undefined){
+							date.textContent = response.message.sales_orders_head.date;
+						}
 					}
 
-
-					var edit = document.createElement("button");
-					edit.textContent = "Edit";
-					edit.setAttribute("id","edit");
-					edit.setAttribute("style","font-size:18px;margin-right:500px;");
-					edit.addEventListener("click",function(event){
-						submit_order("update",`${order}`,"edit-order-table");
-					}); 
-					d.insertBefore(edit,date);
+					var edit = d.querySelector("#edit");
+					if(edit == null){
+						var edit = document.createElement("button");
+						edit.textContent = "Edit";
+						edit.setAttribute("id","edit");
+						edit.setAttribute("style","font-size:18px;margin-right:500px;");
+						edit.addEventListener("click",function(event){
+							submit_order("update",`${order}`,"edit-order-table");
+						}); 
+						d.insertBefore(edit,date);
+					}else{
+						edit.addEventListener("click",function(event){
+							submit_order("update",`${order}`,"edit-order-table");
+						}); 
+					}
 
 					var tbl = document.getElementById("edit-order-table");
 					var lines = Number(response.message.sales_orders_head.lines_nr);	
@@ -513,8 +528,6 @@ function check_input(event){
 					}
 					var rows = tbl.rows;
 
-
-
 					for(let i = 1;i < lines + 1; i++){
 						var access_line_name = `line_${i}`;
 
@@ -522,19 +535,19 @@ function check_input(event){
 						Array.from(rows[i].children).forEach((cell,index)=>{
 							if(index == 0){
 								if(response.message.sales_orders_lines[access_line_name].item_id != undefined){
-									cell.children[index].value = response.message
+									cell.children[0].value = response.message
 										.sales_orders_lines[access_line_name].item_id;
 								}else{
-									cell.children[index].value ="";
+									cell.children[0].value ="";
 
 								}
 							}
 							if(index == 1){
 								if(response.message.sales_orders_lines[access_line_name].uom != undefined){
-									cell.children[index].value = response.message
+									cell.children[0].value = response.message
 										.sales_orders_lines[access_line_name].uom;
 								}else{
-									cell.children[index].value = "";
+									cell.children[0].value = "";
 								}
 							}
 							Array.from(cell.children).forEach(child =>{
