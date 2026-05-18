@@ -11,6 +11,7 @@
   --secondary-color: #64748b;
   --accent-color: #10b981;
   --danger-color: #ef4444;
+  --report-color: #a3a3c2;
   --warning-color: #f59e0b;
   
   /* Neutral Colors */
@@ -509,6 +510,10 @@ button.danger,
   background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
 }
 
+button.report,
+.button.report {
+  background: linear-gradient(135deg, var(--report-color) 0%, #dc2626 100%);
+}
 button.danger:hover,
 .button.danger:hover {
   background: linear-gradient(135deg, #dc2626 0%, var(--danger-color) 100%);

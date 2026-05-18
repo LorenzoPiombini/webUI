@@ -230,8 +230,6 @@ async function displaySalesOrdersThisWeek(orders, weekRange) {
 		return;
 	}
 	
-	console.log("here")
-	console.log(orders)
 	// Filter orders by request date within this week
 	const weekOrders = [];
 	for(let i = 0; i < orders.length; i++){
@@ -352,9 +350,11 @@ function draw_sales_order_menu(){
 
 	var insert_new_order = document.getElementById("new-order");
 	var edit_order = document.getElementById("edit-order");
+	var report = document.getElementById("report-order");
 
 	insert_new_order.addEventListener("click",render_new_order);
 	edit_order.addEventListener("click",render_edit_order);
+	report.addEventListener("click",render_report_order);
 }
 
 
@@ -1060,6 +1060,10 @@ async function get_items(event){
 	input.addEventListener("input",check_input);
 }
 
+async function get_open_orders(event){
+	const response = await send(null,"GET","/reports/open_orders");
+	console.log(JSON.stringify(response.stringify));
+}
 async function get_customers(event){
 	const response = await send(null,"GET","customers");	
 	customers_list = response.message;
@@ -1084,6 +1088,9 @@ function render_edit_order(){
 		var bt2 = document.getElementById("new-order");
 		bt2.style.display = "none";
 
+		var btn3 = document.getElementById("report-order");
+		btn3.style.display = "none";
+
 		root.setAttribute("id","edit-order-menu");
 		root.style.display = null;
 		return; 
@@ -1097,6 +1104,9 @@ function render_edit_order(){
 
 	var btn2 = document.getElementById("new-order");
 	btn2.style.display = "none";
+
+	var btn3 = document.getElementById("report-order");
+	btn3.style.display = "none";
 
 	// Get the main container
 	var mainContainer = document.querySelector('main') || document.getElementById('root');
@@ -1628,6 +1638,76 @@ function render_edit_customer(){
 	d.appendChild(orderInfoGrid);
 	mainContainer.appendChild(d);
 }
+
+function render_report_order(){
+	var root = document.getElementById("hidden-report-order-menu");
+	if(root){
+		var btn = document.getElementById("report-order");
+		btn.textContent = "Back";
+		btn.setAttribute("id","back");
+		btn.removeEventListener("click",render_report_order);
+		btn.addEventListener("click",clear_order_screen);
+		var btn2 = document.getElementById("edit-order");
+		btn2.style.display = "none";
+		var btn3 = document.getElementById("new-order");
+		btn3.style.display = "none";
+
+		root.style.display = null;
+		root.setAttribute("id","report-order-menu");
+		return;
+	}
+
+
+
+	// Get the main container
+	var mainContainer = document.querySelector('main') || document.getElementById('root');
+	if (!mainContainer) {
+		mainContainer = document.body;
+	}
+
+	// Create card container
+	const d = document.createElement(element.div.type);
+	d.setAttribute("id","report-order-menu");
+	d.classList.add("card", "fade-in");
+
+	// Form Header
+	var formHeader = document.createElement("div");
+	formHeader.className = "card-header";
+	formHeader.textContent = "Sales Order Reports";
+	d.appendChild(formHeader);
+
+	// Report btn Section
+	var orderInfoSection = document.createElement("div");
+	orderInfoSection.className = "form-section";
+
+	var orderInfoGrid = document.createElement("div");
+	orderInfoGrid.className = "form-grid";
+
+	orderInfoGrid.style.display = "flex";
+	orderInfoGrid.style.justifyContent = "space-between";
+	orderInfoGrid.style.alignItems = "center";
+	orderInfoGrid.style.marginBottom = "var(--spacing-md)";
+
+	var list_open_order = document.createElement("button");
+	list_open_order.textContent = "Get Open Orders";
+	list_open_order.className = "button";
+	list_open_order.addEventListener("click",get_open_orders);
+	orderInfoGrid.appendChild(list_open_order);
+
+	d.appendChild(orderInfoGrid)
+	mainContainer.appendChild(d);
+
+	var btn = document.getElementById("report-order");
+	btn.textContent = "Back";
+	btn.setAttribute("id","back");
+	btn.removeEventListener("click",render_report_order);
+	btn.addEventListener("click",clear_order_screen);
+	var btn2 = document.getElementById("edit-order");
+	btn2.style.display = "none";
+	var btn3 = document.getElementById("new-order");
+	btn3.style.display = "none";
+}
+
 function render_new_order(){
 	var root = document.getElementById("hidden-new-order-menu");
 	if(root){
@@ -1638,6 +1718,9 @@ function render_new_order(){
 		btn.addEventListener("click",clear_order_screen);
 		var btn2 = document.getElementById("edit-order");
 		btn2.style.display = "none";
+		var btn3 = document.getElementById("report-order");
+		btn3.style.display = "none";
+
 		root.style.display = null;
 		root.setAttribute("id","new-order-menu");
 		return;
@@ -1828,6 +1911,8 @@ function render_new_order(){
 
 	var btn2 = document.getElementById("edit-order");
 	btn2.style.display = "none";
+	var btn3 = document.getElementById("report-order");
+	btn3.style.display = "none";
 }
 
 function compute_total(event) {
@@ -2053,8 +2138,8 @@ function add_line_to_order(table_id){
 
 function get_root_id(){
 	let root = null;
-	let size = 4;
-	let ids = ["new-order-menu","edit-order-menu","root-new-customer","root-edit-customer"];
+	let ids = ["new-order-menu","edit-order-menu","root-new-customer","root-edit-customer","report-order-menu"];
+	let size = ids.length;
 	let i = 0;
 	while(root === null && i < size){
 		root = document.getElementById(ids[i]);
@@ -2071,6 +2156,21 @@ function clear_order_screen(event){
 
 	if(event === undefined){
 		switch(root.id){
+			case "report-order-menu":
+				{
+					root.style.display = "none";
+					root.setAttribute("id","hidden-report-order-menu");
+					var btn = document.getElementById("back");
+					btn.textContent ="Reports";
+					btn.setAttribute("id", "report-order");
+					btn.removeEventListener("click",clear_order_screen);
+					btn.addEventListener("click",render_report_order);
+					var btn2 = document.getElementById("edit-order");
+					btn2.style.display = null;
+					var btn3 = document.getElementById("new-order");
+					btn3.style.display = null;
+					break;
+				}
 			case "new-order-menu":
 				{
 					root.style.display = "none";
@@ -2082,6 +2182,8 @@ function clear_order_screen(event){
 					btn.addEventListener("click",render_new_order);
 					var btn2 = document.getElementById("edit-order");
 					btn2.style.display = null;
+					var btn3 = document.getElementById("report-order");
+					btn3.style.display = null;
 					break;
 				}
 			case "edit-order-menu":
@@ -2095,6 +2197,8 @@ function clear_order_screen(event){
 					btn.addEventListener("click",render_edit_order);
 					var btn2 = document.getElementById("new-order");
 					btn2.style.display = null;
+					var btn3 = document.getElementById("report-order");
+					btn3.style.display = null;
 					break;
 				}
 			case "root-new-customer":
@@ -2130,6 +2234,21 @@ function clear_order_screen(event){
 		return;
 	}else if(event.type === 'click'){
 		switch(root.id){
+			case "report-order-menu":
+				{
+					root.style.display = "none";
+					root.setAttribute("id","hidden-report-order-menu");
+					var btn = document.getElementById("back");
+					btn.textContent ="Reports";
+					btn.setAttribute("id", "report-order");
+					btn.removeEventListener("click",clear_order_screen);
+					btn.addEventListener("click",render_report_order);
+					var btn2 = document.getElementById("edit-order");
+					btn2.style.display = null;
+					var btn3 = document.getElementById("new-order");
+					btn3.style.display = null;
+					break;
+				}
 			case "new-order-menu":
 				{
 					root.style.display = "none";
@@ -2141,6 +2260,8 @@ function clear_order_screen(event){
 					btn.addEventListener("click",render_new_order);
 					var btn2 = document.getElementById("edit-order");
 					btn2.style.display = null;
+					var btn3 = document.getElementById("report-order");
+					btn3.style.display = null;
 					break;
 				}
 			case "edit-order-menu":
@@ -2154,6 +2275,8 @@ function clear_order_screen(event){
 					btn.addEventListener("click",render_edit_order);
 					var btn2 = document.getElementById("new-order");
 					btn2.style.display = null;
+					var btn3 = document.getElementById("report-order");
+					btn3.style.display = null;
 					break;
 				}
 			case "root-new-customer":
