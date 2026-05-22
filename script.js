@@ -1061,8 +1061,17 @@ async function get_items(event){
 }
 
 async function get_open_orders(event){
-	const response = await send(null,"GET","/reports/open_orders");
-	console.log(JSON.stringify(response.stringify));
+	const response = await send(null,"GET","reports/open_orders");
+
+	console.log(JSON.stringify(response.message))
+	const container = document.getElementById("sales-orders-week");
+
+	for(const [key,value] of Object.entries(response.message)){
+		if(key === 'orders_total')
+			continue;
+		console.log(`order nr ${key}, for customer ${response.message[key].customer_id},total : ${response.message[key].total}`);
+	}
+	console.log(`total open orders ${response.message.orders_total}`);
 }
 async function get_customers(event){
 	const response = await send(null,"GET","customers");	
