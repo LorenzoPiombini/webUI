@@ -194,10 +194,9 @@ async function loadDashboardOrders() {
 	
 	// Load Sales Orders
 	try {
-		// you have to create an end point in the C backend it will not be sales_orders 
-		const salesResponse = await send(null, "GET", "sales_orders");
+		const salesResponse = await send(null, "GET", "reports/sales_orders_week");
 		if (salesResponse && salesResponse.message && !salesResponse.message.includes("there are no orders")) {
-			displaySalesOrdersThisWeek(salesResponse.message, weekRange);
+			displaySalesOrdersThisWeek(salesResponse.message);
 		} else {
 			document.getElementById("sales-orders-week").innerHTML = 
 				'<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">No sales orders to ship this week.</p>';
@@ -222,35 +221,18 @@ async function loadDashboardOrders() {
 	}
 }
 
-async function displaySalesOrdersThisWeek(orders, weekRange) {
+async function displaySalesOrdersThisWeek(orders) {
 	const container = document.getElementById("sales-orders-week");
 	
+	
+	console.log(orders)
 	if (!orders || orders.length === 0) {
 		container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">No sales orders to ship this week.</p>';
 		return;
 	}
 	
-	// Filter orders by request date within this week
-	const weekOrders = [];
-	for(let i = 0; i < orders.length; i++){
-		const response = await send(null,"GET",`sales_orders/${orders[i]}`);	
-		console.log(JSON.stringify(response.message));
-		for(let j = 1; j < Number(response.message.sales_orders_head.lines_nr) + 1; j++){
-			if(isDateInWeek(response.message.sales_orders_lines[`line_${j}`].request_date,weekRange.start,weekRange.end)){
-				// For now, just show all orders - you can enhance this by fetching each order's details
-				if(!weekOrders.includes(orders[i]))
-					weekOrders.push(orders[i]);
-			}
-		}
-	}
-	
-	if (weekOrders.length === 0) {
-		container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: var(--spacing-xl);">No sales orders to ship this week.</p>';
-		return;
-	}
-	
 	let html = '<div class="dashboard-orders-list">';
-	weekOrders.slice(0, 10).forEach(orderId => {
+	orders.forEach(orderId => {
 		html += `
 			<div class="dashboard-order-item">
 				<a href="sales_orders.html" style="text-decoration: none; color: var(--primary-color); font-weight: 600;">
@@ -260,12 +242,14 @@ async function displaySalesOrdersThisWeek(orders, weekRange) {
 		`;
 	});
 	
+	/*
 	if (weekOrders.length > 10) {
 		html += `<p style="text-align: center; color: var(--text-secondary); margin-top: var(--spacing-md);">
 			And ${weekOrders.length - 10} more orders...
 		</p>`;
 	}
 	
+	*/
 	html += '</div>';
 	container.innerHTML = html;
 }
