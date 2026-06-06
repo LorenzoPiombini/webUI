@@ -1,8 +1,6 @@
 
 /* send data to the server */
-let airport_or_abroad = "10.0.0.1"
-//let address = "192.168.1.3"
-let address = airport_or_abroad;
+let address = "192.168.1.3"
 export async function send(payload,method,resource){
 	if(payload == null && method === "POST") return;
 	let req = 0;
