@@ -1047,15 +1047,18 @@ async function get_items(event){
 async function get_open_orders(event){
 	const response = await send(null,"GET","reports/open_orders");
 
-	console.log(JSON.stringify(response.message))
-	const container = document.getElementById("sales-orders-week");
+	const container = document.getElementById("report-order-menu");
 
+	let html = '<div class="report">';
 	for(const [key,value] of Object.entries(response.message)){
 		if(key === 'orders_total')
 			continue;
-		console.log(`order nr ${key}, for customer ${response.message[key].customer_id},total : ${response.message[key].total}`);
+		html +=	`order nr ${key}, for customer ${response.message[key].customer_id},total : ${response.message[key].total}<br>`;
 	}
-	console.log(`total open orders ${response.message.orders_total}`);
+
+	html += `total open orders ${response.message.orders_total}`;
+	html += `</div>`;
+	container.innerHTML += html;
 }
 async function get_customers(event){
 	const response = await send(null,"GET","customers");	
