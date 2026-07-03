@@ -1044,6 +1044,23 @@ async function get_items(event){
 	input.addEventListener("input",check_input);
 }
 
+async function get_overdue_orders(event){
+	const response = await send(null,"GET","reports/overdue_orders");
+	console.log(JSON.stringify(response));
+	return;
+	const container = document.getElementById("report-order-menu");
+
+	let html = '<div class="report">';
+	for(const [key,value] of Object.entries(response.message)){
+		if(key === 'orders_total')
+			continue;
+		html +=	`order nr ${key}, for customer ${response.message[key].customer_id},total : ${response.message[key].total}<br>`;
+	}
+
+	html += `total open orders ${response.message.orders_total}`;
+	html += `</div>`;
+	container.innerHTML += html;
+}
 async function get_open_orders(event){
 	const response = await send(null,"GET","reports/open_orders");
 
@@ -1690,7 +1707,26 @@ function render_report_order(){
 	list_open_order.addEventListener("click",get_open_orders);
 	orderInfoGrid.appendChild(list_open_order);
 
-	d.appendChild(orderInfoGrid)
+	var list_overdue_order = document.createElement("button");
+	list_overdue_order.textContent = "Get Overdue Orders";
+	list_overdue_order.className = "button";
+	list_overdue_order.addEventListener("click",get_overdue_orders);
+	orderInfoGrid.appendChild(list_overdue_order);
+
+	var p1 = document.createElement("button");
+	p1.textContent = "this is a place older";
+	p1.className = "invisible";
+	var p2 = document.createElement("button");
+	p2.textContent = "this is a place older";
+	p2.className = "invisible";
+	var p3 = document.createElement("button");
+	p3.textContent = "this is a place older";
+	p3.className = "invisible";
+	
+	orderInfoGrid.appendChild(p1);
+	orderInfoGrid.appendChild(p2);
+	orderInfoGrid.appendChild(p3);
+	d.appendChild(orderInfoGrid);
 	mainContainer.appendChild(d);
 
 	var btn = document.getElementById("report-order");

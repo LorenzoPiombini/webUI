@@ -491,6 +491,11 @@ button:focus,
   outline-offset: 2px;
 }
 
+.invisible{
+	opacity: 0;
+	cursor: default;
+}
+
 /* Button Variants */
 button.secondary,
 .button.secondary {
