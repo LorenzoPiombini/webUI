@@ -1046,36 +1046,56 @@ async function get_items(event){
 
 async function get_overdue_orders(event){
 	const response = await send(null,"GET","reports/overdue_orders");
-	console.log(JSON.stringify(response));
-	return;
-	const container = document.getElementById("report-order-menu");
+	//console.log(JSON.stringify(response));
 
-	let html = '<div class="report">';
+	let data_to_show = "<h4>Overdue Orders:</h4>";
 	for(const [key,value] of Object.entries(response.message)){
 		if(key === 'orders_total')
 			continue;
-		html +=	`order nr ${key}, for customer ${response.message[key].customer_id},total : ${response.message[key].total}<br>`;
+		data_to_show +=	`order nr ${key}, for customer ${response.message[key].customer_id},total : ${response.message[key].total}<br>`;
 	}
+	data_to_show += `total overdue orders ${response.message.orders_total}`;
 
-	html += `total open orders ${response.message.orders_total}`;
-	html += `</div>`;
-	container.innerHTML += html;
+	let report_container = document.getElementById("report-container");
+	if(!report_container){
+		const container = document.getElementById("report-order-menu");
+		let html = `<div class="report" id="report-container">${data_to_show}</div>`;
+		container.insertAdjacentHTML('beforeend',html);
+	}else{
+		if(data_to_show === report_container.innerHTML){
+			console.log("data is the same!");
+			return;
+		}
+		report_container.innerHTML = `<div class="report">${data_to_show}</div>`;
+	}
 }
+
 async function get_open_orders(event){
 	const response = await send(null,"GET","reports/open_orders");
 
-	const container = document.getElementById("report-order-menu");
 
-	let html = '<div class="report">';
+	let data_to_show = '<h4>Open Orders</h4>';
 	for(const [key,value] of Object.entries(response.message)){
 		if(key === 'orders_total')
 			continue;
-		html +=	`order nr ${key}, for customer ${response.message[key].customer_id},total : ${response.message[key].total}<br>`;
+		data_to_show +=	`order nr ${key}, for customer ${response.message[key].customer_id},total : ${response.message[key].total}<br>`;
 	}
 
-	html += `total open orders ${response.message.orders_total}`;
-	html += `</div>`;
-	container.innerHTML += html;
+	data_to_show += `total open orders ${response.message.orders_total}`;
+
+	let report_container = document.getElementById("report-container");
+	if(!report_container){
+		const container = document.getElementById("report-order-menu");
+		let html = `<div class="report" id="report-container">${data_to_show}</div>`;
+		container.insertAdjacentHTML('beforeend',html);
+	}else{
+		if(data_to_show === report_container.innerHTML){
+			console.log("data is the same!");
+			return;
+		}
+
+		report_container.innerHTML = `<div class="report">${data_to_show}</div>`;
+	}
 }
 async function get_customers(event){
 	const response = await send(null,"GET","customers");	
