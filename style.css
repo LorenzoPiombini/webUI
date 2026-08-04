@@ -123,7 +123,7 @@ body {
 
 /* Sidebar Header */
 .sidenav::before {
-  content: 'BSM';
+  content: 'EZgen';
   display: block;
   padding: var(--spacing-xl) var(--spacing-lg);
   font-size: var(--font-size-2xl);
