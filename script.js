@@ -20,7 +20,7 @@ async function setActiveNavLink() {
 			input.value = order_id;
 			var d = document.getElementById("edit-order-menu");
 			draw_edit_order_table(response,d);
-
+			input.addEventListener('focus',get_orders);
 		}
 		//TODO: 
 		//	-1) check if there is data in the form
@@ -551,11 +551,12 @@ function check_input(event){
 					}
 					var ord_table_tot = document.getElementById("order-total-lbl");
 					if(ord_table_tot){
-						ord_table_tot.textContent = sum;
+						var output_parts  = ord_table_tot.textContent.split("$ ");
+						ord_table_tot.textContent = output_parts[0] + "$ " + sum;
+
 					}
 					return;
 				}
-
 				draw_edit_order_table(response,d);
 			});
 			dropdown.appendChild(option);
@@ -575,7 +576,6 @@ function check_input(event){
 
 				var root = document.getElementById("root-edit-customer");
 				if(root){
-
 					/*get the customer selected by the users*/
 					let response = await send(null,"GET",`customers/${customer}`);
 					/*TODO: remove this when you ready*/
@@ -2503,8 +2503,8 @@ function draw_edit_order_table(response,d){
 	d.appendChild(input_customer);
 
 
-	var br1 = document.createElement("br");
-	d.appendChild(br1);
+//	var br1 = document.createElement("br");
+//	d.appendChild(br1);
 
 	/*create price level input field*/	
 	var price_label = document.createElement("label");
@@ -2551,17 +2551,14 @@ function draw_edit_order_table(response,d){
 		["Item","Uom","Qty","Disc","Unit Price","Total","Request Date",""],"edit-order-table"));
 
 	var order_total_desc = document.createElement("label");
+	order_total_desc.setAttribute("id","order-total-lbl");
 	order_total_desc.textContent = "Order Total: $";
 	order_total_desc.setAttribute("style","font-size:24px;margin-right:15px;");
-	var order_total_label= document.createElement("label");
-	order_total_label.setAttribute("style","font-size:24px;");
-	order_total_label.setAttribute("id","order-total-lbl");
 
 	const d_child_one = document.createElement(element.div.type);
 	d_child_one.setAttribute("id","order-total");
 	d_child_one.setAttribute("style","margin-left:64%;");
 	d_child_one.appendChild(order_total_desc);
-	d_child_one.appendChild(order_total_label);
 	d.appendChild(d_child_one);
 
 
@@ -2630,5 +2627,23 @@ function draw_edit_order_table(response,d){
 			});
 		});
 	}
-	order_total_label.textContent = sum;
+
+	order_total_desc.textContent += ` ${sum}`;
+
+	// Focus  order on cust-id input and scroll to show the form
+	setTimeout(function() {
+		var custNameInput = document.getElementById("cust-id");
+		if (custNameInput) {
+			custNameInput.focus();
+		}
+		// Minimal scroll - only scroll if form is not visible, then adjust slightly
+		//var formRect = d.getBoundingClientRect();
+		//var isVisible = formRect.top >= 0 && formRect.top < window.innerHeight;
+
+		window.scrollBy({
+			top: 450,
+			behavior: 'smooth'
+		});
+	}, 200);
+
 }
