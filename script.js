@@ -1,4 +1,3 @@
-import * as element from './elements.js'
 import send from './net.js'
 
 /*SET ACTIVE NAVIGATION LINK*/
@@ -21,12 +20,15 @@ async function setActiveNavLink() {
 			var d = document.getElementById("edit-order-menu");
 			draw_edit_order_table(response,d);
 			input.addEventListener('focus',get_orders);
+			var cust = document.getElementById('cust-id');
+			scroll_down(cust,450);
 		}
 		//TODO: 
 		//	-1) check if there is data in the form
 		//	-2) ask user if they want to save the order, o if they want to lose the data. 
 		localStorage.removeItem('customer_order');
 		localStorage.removeItem('edit_order_data');
+		window.show_order_in_report_section = show_order_in_report_section;
 	}
 
 	const navLinks = document.querySelectorAll('.sidenav a');
@@ -552,7 +554,7 @@ function check_input(event){
 					var ord_table_tot = document.getElementById("order-total-lbl");
 					if(ord_table_tot){
 						var output_parts  = ord_table_tot.textContent.split("$ ");
-						ord_table_tot.textContent = output_parts[0] + "$ " + sum;
+						ord_table_tot.textContent = output_parts[0] + "$ " + Number(sum).toFixed(2);
 
 					}
 					return;
@@ -882,7 +884,6 @@ async function get_items(event){
 
 async function get_overdue_orders(event){
 	const response = await send(null,"GET","reports/overdue_orders");
-	//console.log(JSON.stringify(response));
 
 	let data_to_show = "<h4>Overdue Orders:</h4>";
 	for(const [key,value] of Object.entries(response.message)){
@@ -914,7 +915,8 @@ async function get_open_orders(event){
 	for(const [key,value] of Object.entries(response.message)){
 		if(key === 'orders_total')
 			continue;
-		data_to_show +=	`order nr ${key}, for customer ${response.message[key].customer_id},total : ${response.message[key].total}<br>`;
+		data_to_show +=	`order nr <span class="clickable-word" onclick="show_order_in_report_section(${key})">${key}</span>, for customer ${response.message[key].customer_id},total : ${response.message[key].total}<br>`;
+
 	}
 
 	data_to_show += `total open orders ${response.message.orders_total}`;
@@ -984,7 +986,7 @@ function render_edit_order(){
 	}
 
 	// Create card container
-	const d = document.createElement(element.div.type);
+	const d = document.createElement("div");
 	d.setAttribute("id","edit-order-menu");
 	d.classList.add("card", "fade-in");
 
@@ -1535,7 +1537,7 @@ function render_report_order(){
 	}
 
 	// Create card container
-	const d = document.createElement(element.div.type);
+	const d = document.createElement("div");
 	d.setAttribute("id","report-order-menu");
 	d.classList.add("card", "fade-in");
 
@@ -1621,7 +1623,7 @@ function render_new_order(){
 	}
 
 	// Create card container
-	const d = document.createElement(element.div.type);
+	const d = document.createElement("div");
 	d.setAttribute("id","new-order-menu");
 	d.classList.add("card", "fade-in");
 
@@ -2486,7 +2488,7 @@ async function submit_new_customer(){
 
 
 //d is a document element
-function draw_edit_order_table(response,d){
+function draw_edit_order_table(response,d,id=null){
 
 	var c_label = document.createElement("label");
 	c_label.textContent = "Customer id:";
@@ -2547,30 +2549,29 @@ function draw_edit_order_table(response,d){
 	d.appendChild(date);
 
 	/*create table and populate with the response */		
-	d.appendChild(create_table(response.message.sales_orders_head.lines_nr,
-		["Item","Uom","Qty","Disc","Unit Price","Total","Request Date",""],"edit-order-table"));
+	var tbl = create_table(response.message.sales_orders_head.lines_nr,
+		["Item","Uom","Qty","Disc","Unit Price","Total","Request Date",""],id == null ? "edit-order-table" : id);
 
+	d.appendChild(tbl);
 	var order_total_desc = document.createElement("label");
 	order_total_desc.setAttribute("id","order-total-lbl");
 	order_total_desc.textContent = "Order Total: $";
 	order_total_desc.setAttribute("style","font-size:24px;margin-right:15px;");
 
-	const d_child_one = document.createElement(element.div.type);
+	const d_child_one = document.createElement("div")
 	d_child_one.setAttribute("id","order-total");
-	d_child_one.setAttribute("style","margin-left:64%;");
+	d_child_one.setAttribute("style","margin-left:74%;");
 	d_child_one.appendChild(order_total_desc);
 	d.appendChild(d_child_one);
 
-
 	/*add event to populate the total, int the table*/
-	document.getElementById("edit-order-table").addEventListener('change',compute_total);
+	tbl.addEventListener('change',compute_total);
 
 	/* populate the table with the order lines*/
-	var tbl = document.getElementById("edit-order-table");
 	var rows = tbl.rows;
 	if((rows.length - 1) < Number(response.message.sales_orders_head.lines_nr)){
 		for(let i = 0; i < Number(response.message.sales_orders_head.lines_nr) -1;i++){
-			add_line_to_order("edit-order-table");		
+			add_line_to_order(id == null ? "edit-order-table" : id);		
 		}
 	}
 	var sum = 0;
@@ -2601,9 +2602,7 @@ function draw_edit_order_table(response,d){
 						.disc == undefined){
 						child.value = 0.00;
 					}else{
-						child.value = response.
-							message.
-							sales_orders_lines[access_line_name].disc;
+						child.value = response.message.sales_orders_lines[access_line_name].disc;
 					}
 				}
 				if(child.classList.contains("tot")){
@@ -2628,7 +2627,115 @@ function draw_edit_order_table(response,d){
 		});
 	}
 
-	order_total_desc.textContent += ` ${sum}`;
+	order_total_desc.textContent += ` ${Number(sum).toFixed(2)}`;
+}
+
+function scroll_down(focus_on_this_element,scroll_from_top){
+	// Focus  order on cust-id input and scroll to show the form
+	setTimeout(function() {
+		focus_on_this_element.focus();
+		// Minimal scroll - only scroll if form is not visible, then adjust slightly
+		//var formRect = d.getBoundingClientRect();
+		//var isVisible = formRect.top >= 0 && formRect.top < window.innerHeight;
+
+		window.scrollBy({
+			top: scroll_from_top,
+			behavior: 'smooth'
+		});
+		focus_on_this_element.blur();
+	}, 200);
+}
+
+function repopulate_edit_order_table(response,tbl){
+
+	var cust_id = document.getElementById("cust-id");
+	var price_level = document.getElementById("price-level");
+	var date = document.getElementById("date");
+	cust_id.value = response.message.sales_orders_head.customer_id;
+	date.textContent = response.message.sales_orders_head.date;
+	price_level.value = response.message.sales_orders_head.price_level_id;
+
+	var lines = Number(response.message.sales_orders_head.lines_nr);	
+	if((tbl.rows.length -1) < lines){
+		for(let i = 0;i < lines - (tbl.rows.length - 1) ; i++){
+			add_line_to_order("edit-order-table");
+		}
+	}
+	var rows = tbl.rows;
+
+	var sum = 0;
+	for(let i = 1;i < lines + 1; i++){
+		var access_line_name = `line_${i}`;
+
+
+		Array.from(rows[i].children).forEach((cell,index)=>{
+			if(index == 0){
+				if(response.message.sales_orders_lines[access_line_name].item_id != undefined){
+					cell.children[0].value = response.message
+						.sales_orders_lines[access_line_name].item_id;
+				}else{
+					cell.children[0].value ="";
+
+				}
+			}
+			if(index == 1){
+				if(response.message.sales_orders_lines[access_line_name].uom != undefined){
+					cell.children[0].value = response.message
+						.sales_orders_lines[access_line_name].uom;
+				}else{
+					cell.children[0].value = "";
+				}
+			}
+			Array.from(cell.children).forEach(child =>{
+				if(child.classList.contains("tot")) {
+					child.textContent = response.message
+						.sales_orders_lines[access_line_name].total;
+					sum += Number(response.message.sales_orders_lines[access_line_name].total);
+				}
+				if(child.classList.contains("qty")) {
+					child.value = response.message
+						.sales_orders_lines[access_line_name].qty;
+				}
+				if(child.classList.contains("disc")) {
+					if(response.message
+						.sales_orders_lines[access_line_name]
+						.disc == undefined){
+						child.value = 0.00;
+					}else{
+						child.value = response.message
+							.sales_orders_lines[access_line_name].disc;
+					}
+				}
+
+				if(child.classList.contains("price")) {
+					child.value = response.message
+						.sales_orders_lines[access_line_name].unit_price;
+				}
+
+				if(child.classList.contains("rdate")) {
+					child.value = response.message
+						.sales_orders_lines[access_line_name].request_date;
+				}
+
+			});
+		});
+
+	}
+
+	/* clean tbl*/
+	for(let i = lines; i < rows.length; i++ ){
+		if(i == lines){
+			continue;
+		}
+		tbl.deleteRow(i);
+	}
+
+	var ord_table_tot = document.getElementById("order-total-lbl");
+	if(ord_table_tot){
+		var output_parts  = ord_table_tot.textContent.split("$ ");
+		ord_table_tot.textContent = output_parts[0] + "$ " + Number(sum).toFixed(2);
+
+	}
 
 	// Focus  order on cust-id input and scroll to show the form
 	setTimeout(function() {
@@ -2645,5 +2752,39 @@ function draw_edit_order_table(response,d){
 			behavior: 'smooth'
 		});
 	}, 200);
+	return;
+}
 
+async function show_order_in_report_section(order_nr){
+
+	let response = await send(null,"GET",`sales_orders/${order_nr}`);
+	if(response == undefined || response == null){
+		alert(`could not fetch order ${order_nr} from the server.`);
+		return ;
+	}
+
+	var table_is_there = document.getElementById("order-table-report")
+	if(table_is_there){
+		var order_title = document.getElementById("order-title");
+		order_title.textContent = `Order ${order_nr}`;
+		repopulate_edit_order_table(response,table_is_there);
+		return;
+	}
+	
+	var br = document.createElement("br");
+	var el = document.getElementById("report-order-menu");
+	el.appendChild(br);
+	var order_section = document.createElement("div");
+	order_section.className = "form-section";
+	var order_title = document.createElement("h3");
+	order_title.className = "section-title";
+	order_title.textContent = `Order ${order_nr}`;
+	order_title.setAttribute("id","order-title");
+	order_section.appendChild(order_title);
+
+
+	draw_edit_order_table(response,order_section,"order-table-report");
+	el.appendChild(order_section);
+	var cust = document.getElementById('cust-id');
+	scroll_down(cust,450);
 }
