@@ -169,44 +169,7 @@ function loadTheme() {
 	}, 100);
 }
 
-// Dashboard Functions
-function getThisWeekDateRange() {
-	const today = new Date();
-	const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-	
-	// Get Monday of this week
-	const monday = new Date(today);
-	const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust when day is Sunday
-	monday.setDate(diff);
-	monday.setHours(0, 0, 0, 0);
-	
-	// Get Sunday of this week
-	const sunday = new Date(monday);
-	sunday.setDate(monday.getDate() + 6);
-	sunday.setHours(23, 59, 59, 999);
-	
-	return { start: monday, end: sunday };
-}
-
-function formatDate(date) {
-	if (!date) return '';
-	const d = new Date(date);
-	const year = d.getFullYear();
-	const month = String(d.getMonth() + 1).padStart(2, '0');
-	const day = String(d.getDate()).padStart(2, '0');
-	return `${month}-${day}-${year}`;
-}
-
-function isDateInWeek(dateStr, weekStart, weekEnd) {
-	if (!dateStr) return false;
-	const date = new Date(dateStr);
-	return date >= weekStart && date <= weekEnd;
-}
-
 async function loadDashboardOrders() {
-	const weekRange = getThisWeekDateRange();
-	const weekStartStr = formatDate(weekRange.start);
-	const weekEndStr = formatDate(weekRange.end);
 	
 	// Load Sales Orders
 	try {
@@ -465,7 +428,7 @@ function check_input(event){
 				console.log(JSON.stringify(response.message));
 				localStorage.setItem('edit_order_data',JSON.stringify(response.message));
 				var el = d.querySelector("#cust-id");
-				if(el != null){
+				if(el != null){/*the order table already exist*/
 
 					if(response.message.sales_orders_head.customer_id != undefined){
 						el.value = response.message.sales_orders_head.customer_id;
@@ -520,6 +483,7 @@ function check_input(event){
 					}
 					var rows = tbl.rows;
 
+					var sum = 0;
 					for(let i = 1;i < lines + 1; i++){
 						var access_line_name = `line_${i}`;
 
@@ -546,6 +510,7 @@ function check_input(event){
 								if(child.classList.contains("tot")) {
 									child.textContent = response.message
 										.sales_orders_lines[access_line_name].total;
+									sum += Number(response.message.sales_orders_lines[access_line_name].total);
 								}
 								if(child.classList.contains("qty")) {
 									child.value = response.message
@@ -576,6 +541,7 @@ function check_input(event){
 						});
 
 					}
+
 					/* clean tbl*/
 					for(let i = lines; i < rows.length; i++ ){
 						if(i == lines){
@@ -583,152 +549,14 @@ function check_input(event){
 						}
 						tbl.deleteRow(i);
 					}
-					return 
-				}
-
-				var c_label = document.createElement("label");
-				c_label.textContent = "Customer id:";
-				c_label.className = "label";
-				d.appendChild(c_label);
-
-				var input_customer = document.createElement("input");
-				input_customer.className = "input_2px_border";
-				input_customer.setAttribute("id","cust-id");
-				if(response.message.sales_orders_head.customer_id != null){
-					input_customer.value = response.message.sales_orders_head.customer_id;
-				}
-
-				d.appendChild(input_customer);
-
-
-				var br1 = document.createElement("br");
-				d.appendChild(br1);
-
-				/*create price level input field*/	
-				var price_label = document.createElement("label");
-				price_label.textContent = "Price level:";
-				price_label.className = "label";
-				d.appendChild(price_label);
-
-				var price_level= document.createElement("input");
-				price_level.className = "input_2px_border";
-				price_level.setAttribute("id","price-level");
-
-				if(response.message.sales_orders_head.price_level_id != null){
-					price_level.value = response.message.sales_orders_head.price_level_id;
-				}
-
-				d.appendChild(price_level);
-
-				var add_line = document.createElement("button");
-				add_line.textContent = "Add line";
-				add_line.setAttribute("id","add_line");
-				add_line.setAttribute("style","font-size:18px;margin-rigth:18px;");
-				add_line.addEventListener("click", function(event){
-					add_line_to_order("edit-order-table");
-				});
-				d.appendChild(add_line);
-
-				var edit = document.createElement("button");
-				edit.textContent = "Edit";
-				edit.setAttribute("id","edit");
-				edit.className = "button";
-				edit.addEventListener("click",function(event){
-					submit_order("update",`${order}`,"edit-order-table");
-				}); 
-				d.appendChild(edit);
-
-				var date = document.createElement("label");
-				date.setAttribute("id","date");
-				date.setAttribute("style","font-size:24px;");
-				date.textContent = response.message.sales_orders_head.date;	
-				d.appendChild(date);
-
-				/*create table and populate with the response */		
-				d.appendChild(create_table(response.message.sales_orders_head.lines_nr,
-					["Item","Uom","Qty","Disc","Unit Price","Total","Request Date",""],"edit-order-table"));
-
-				var order_total_desc = document.createElement("label");
-				order_total_desc.textContent = "Order Total: $";
-				order_total_desc.setAttribute("style","font-size:24px;margin-right:15px;");
-				var order_total_label= document.createElement("label");
-				order_total_label.setAttribute("style","font-size:24px;");
-				order_total_label.setAttribute("id","order-total-lbl");
-
-				const d_child_one = document.createElement(element.div.type);
-				d_child_one.setAttribute("id","order-total");
-				d_child_one.setAttribute("style","margin-left:64%;");
-				d_child_one.appendChild(order_total_desc);
-				d_child_one.appendChild(order_total_label);
-				d.appendChild(d_child_one);
-
-
-				/*add event to populate the total, int the table*/
-				document.getElementById("edit-order-table").addEventListener('change',compute_total);
-
-				/* populate the table with the order lines*/
-				var tbl = document.getElementById("edit-order-table");
-				var rows = tbl.rows;
-				if((rows.length - 1) < Number(response.message.sales_orders_head.lines_nr)){
-					for(let i = 0; i < Number(response.message.sales_orders_head.lines_nr) -1;i++){
-						add_line_to_order("edit-order-table");		
+					var ord_table_tot = document.getElementById("order-total-lbl");
+					if(ord_table_tot){
+						ord_table_tot.textContent = sum;
 					}
+					return;
 				}
-				var sum = 0;
-				for(let i = 1;i < Number(response.message.sales_orders_head.lines_nr) + 1; i++){
 
-					var access_line_name = `line_${i}`;
-					Array.from(rows[i].children).forEach((cell,index)=>{
-						if(index == 0){
-							if(response.message.sales_orders_lines[access_line_name].item_id != undefined){
-								cell.children[0].value = response.message
-									.sales_orders_lines[access_line_name].item_id;
-							}
-						}
-						if(index == 1){
-							if(response.message.sales_orders_lines[access_line_name].uom != undefined){
-								cell.children[0].value = response.message
-									.sales_orders_lines[access_line_name].uom;
-							}
-						}
-						Array.from(cell.children).forEach(child =>{
-							if(child.classList.contains("qty")) {
-								child.value = response.message.sales_orders_lines[access_line_name].qty;
-							}
-
-							if(child.classList.contains("disc")) {
-								if(response.message
-									.sales_orders_lines[access_line_name]
-									.disc == undefined){
-									child.value = 0.00;
-								}else{
-									child.value = response.
-										message.
-										sales_orders_lines[access_line_name].disc;
-								}
-							}
-							if(child.classList.contains("tot")){
-								if(response.message
-									.sales_orders_lines[access_line_name]
-									.total == undefined){
-									child.value = 0.00;
-									sum += Number(child.textContent);
-								}else{
-									child.textContent = `$ ${response.message.sales_orders_lines[access_line_name].total}`;
-									sum += Number(response.message.sales_orders_lines[access_line_name].total);
-								}
-							}
-							if(child.classList.contains("price")) {
-								child.value = response.message.sales_orders_lines[access_line_name].unit_price;
-							}
-
-							if(child.classList.contains("rdate")) {
-								child.value = response.message.sales_orders_lines[access_line_name].request_date;
-							}
-						});
-					});
-				}
-				order_total_label.textContent = sum;
+				draw_edit_order_table(response,d);
 			});
 			dropdown.appendChild(option);
 		});
@@ -2803,5 +2631,4 @@ function draw_edit_order_table(response,d){
 		});
 	}
 	order_total_label.textContent = sum;
-
 }
