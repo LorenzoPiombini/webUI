@@ -4,30 +4,31 @@
 	<link rel="stylesheet" href="style.css">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Purchase Orders - BSM</title>
+	<title>Customers - BSM</title>
 	<script type="module" src="script.js"></script>
 </head>
 <body>
 	<nav class="sidenav" role="navigation" aria-label="Main navigation">
 		<a href="index.html">🏠 Dashboard</a>
 		<a href="sales_orders.html">📋 Sales Orders</a>
-		<a href="purchase_orders.html" class="active">🛒 Purchase Orders</a>
+		<a href="purchase_orders.html">🛒 Purchase Orders</a>
 		<a href="account_receivable.html">💰 Account Receivable</a>
 		<a href="account_payable.html">💳 Account Payable</a>
-		<a href="inventory.html">🏷️ Inventory</a>
+		<a href="inventory.html" class ="active">🏷️ Inventory</a>
 		<a href="general_ledger.html">📊 General Ledger</a>
 		<a href="customers.html">👥 Customers</a>
 		<div class="sidenav-settings">
 			<a href="#" class="settings-link" id="settings-link">⚙️ Settings</a>
 		</div>
 	</nav>
-	<main class="main">
+	<main class="main" id="root">
 		<div class="page-header">
-			<h1>Purchase Orders</h1>
-			<p>Manage your purchase orders</p>
+			<h1>Inventory</h1>
+			<p>Mange your inventory</p>
 		</div>
 		<div class="card fade-in">
-			<p>Purchase order management coming soon...</p>
+			<button class="button success" id="new-intem">➕ New Item</button>
+			<button class="button" id="edit-item">✏️ Edit Item</button>
 		</div>
 	</main>
 	
