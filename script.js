@@ -10,7 +10,7 @@ async function setActiveNavLink() {
 			let response = await send(null,"GET",`sales_orders/${order_id}`);
 			if(response == undefined || response == null){
 				alert(`could not fetch order ${order_id} from the server.`);
-				return ;
+				return;
 
 			}
 			render_edit_order();
@@ -18,7 +18,7 @@ async function setActiveNavLink() {
 			input.removeEventListener('focus',get_orders);
 			input.value = order_id;
 			var d = document.getElementById("edit-order-menu");
-			draw_edit_order_table(response,d);
+			draw_edit_order_table(response,d,null,order_id);
 			input.addEventListener('focus',get_orders);
 			var cust = document.getElementById('cust-id');
 			scroll_down(cust,450);
@@ -73,9 +73,12 @@ function setupKeyboardNavigation() {
 				targetUrl = 'account_payable.html';
 				break;
 			case '5':
-				targetUrl = 'general_ledger.html';
+				targetUrl = 'inventory.html';
 				break;
 			case '6':
+				targetUrl = 'general_ledger.html';
+				break;
+			case '7':
 				targetUrl = 'customers.html';
 				break;
 			default:
@@ -559,7 +562,7 @@ function check_input(event){
 					}
 					return;
 				}
-				draw_edit_order_table(response,d);
+				draw_edit_order_table(response,d,null,order);
 			});
 			dropdown.appendChild(option);
 		});
@@ -2007,8 +2010,8 @@ function create_table_cell(columnName, table_id, row, row_index, set_item_getter
 	return cell;
 }
 
-function add_line_to_order(table_id){
-	var table = document.getElementById(table_id);
+function add_line_to_order(tbl=null, table_id){
+	var table = tbl !== null ? tbl : document.getElementById(table_id);
 	var row_index = table.rows.length;
 	var headerRow = table.rows[0];
 	var row = table.insertRow(-1);
@@ -2488,7 +2491,7 @@ async function submit_new_customer(){
 
 
 //d is a document element
-function draw_edit_order_table(response,d,id=null){
+function draw_edit_order_table(response,d,id=null,order_nr){
 
 	var c_label = document.createElement("label");
 	c_label.textContent = "Customer id:";
@@ -2529,7 +2532,7 @@ function draw_edit_order_table(response,d,id=null){
 	add_line.setAttribute("id","add_line");
 	add_line.setAttribute("style","font-size:18px;margin-rigth:18px;");
 	add_line.addEventListener("click", function(event){
-		add_line_to_order("edit-order-table");
+		add_line_to_order(id == null ? "edit-order-table" : id);
 	});
 	d.appendChild(add_line);
 
@@ -2538,7 +2541,7 @@ function draw_edit_order_table(response,d,id=null){
 	edit.setAttribute("id","edit");
 	edit.className = "button";
 	edit.addEventListener("click",function(event){
-		submit_order("update",`${order}`,"edit-order-table");
+		submit_order("update",`${order_nr}`,id == null ? "edit-order-table" : id);
 	}); 
 	d.appendChild(edit);
 
@@ -2571,7 +2574,7 @@ function draw_edit_order_table(response,d,id=null){
 	var rows = tbl.rows;
 	if((rows.length - 1) < Number(response.message.sales_orders_head.lines_nr)){
 		for(let i = 0; i < Number(response.message.sales_orders_head.lines_nr) -1;i++){
-			add_line_to_order(id == null ? "edit-order-table" : id);		
+			add_line_to_order(tbl, id == null ? "edit-order-table" : id);		
 		}
 	}
 	var sum = 0;
@@ -2646,8 +2649,13 @@ function scroll_down(focus_on_this_element,scroll_from_top){
 	}, 200);
 }
 
-function repopulate_edit_order_table(response,tbl){
+function repopulate_edit_order_table(response,tbl,id=null,order_nr){
 
+	var edit_btn = document.getElementById("edit");
+	edit_btn.removeEventListener("click",submit_order);
+	edit_btn.addEventListener("click",function(event){
+		submit_order("update",`${order_nr}`,id == null ? "edit-order-table" : id);
+	});
 	var cust_id = document.getElementById("cust-id");
 	var price_level = document.getElementById("price-level");
 	var date = document.getElementById("date");
@@ -2658,7 +2666,7 @@ function repopulate_edit_order_table(response,tbl){
 	var lines = Number(response.message.sales_orders_head.lines_nr);	
 	if((tbl.rows.length -1) < lines){
 		for(let i = 0;i < lines - (tbl.rows.length - 1) ; i++){
-			add_line_to_order("edit-order-table");
+			add_line_to_order(tbl,tbl.id);
 		}
 	}
 	var rows = tbl.rows;
@@ -2767,7 +2775,7 @@ async function show_order_in_report_section(order_nr){
 	if(table_is_there){
 		var order_title = document.getElementById("order-title");
 		order_title.textContent = `Order ${order_nr}`;
-		repopulate_edit_order_table(response,table_is_there);
+		repopulate_edit_order_table(response,table_is_there,"order-table-report",order_nr);
 		return;
 	}
 	
@@ -2783,7 +2791,7 @@ async function show_order_in_report_section(order_nr){
 	order_section.appendChild(order_title);
 
 
-	draw_edit_order_table(response,order_section,"order-table-report");
+	draw_edit_order_table(response,order_section,"order-table-report",order_nr);
 	el.appendChild(order_section);
 	var cust = document.getElementById('cust-id');
 	scroll_down(cust,450);
