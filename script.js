@@ -282,6 +282,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		draw_customer_menu();
 	}else if(page.includes("sales_orders")){
 		draw_sales_order_menu();
+	}else if(page.includes("inventory")){
+		draw_inventory_menu();
 	}
 	
 	// Load dashboard data if on index page
@@ -295,6 +297,14 @@ function erase_main_menu(){
 	var btn2 = document.getElementById("customer_menu");
 	btn.remove();
 	btn2.remove();
+}
+
+function draw_inventory_menu(){
+	var new_item = document.getElementById("new-item");
+	var edit_item = document.getElementById("edit-item");
+
+	new_item.addEventListener("click",render_new_item);
+	edit_item.addEventListener("click",render_edit_item);
 }
 
 function draw_customer_menu(){
@@ -1060,6 +1070,27 @@ function show_tax_authority()
 	}
 }
 
+function render_edit_item(){
+	/*TODO*/
+
+}
+function render_new_item(){
+	/*get root div*/
+	var root = document.getElementById("hidden-root-new-item");
+	if(root){
+		const nw_item_btn = document.getElementById("new-item");
+		nw_item_btn.textContent = "Back";
+		nw_item_btn.setAttribute("id","back");
+		nw_item_btn.removeEventListener("click",render_new_item);
+		nw_item_btn.addEventListener("click",clear_order_screen);
+
+		const edit_cust_btn = document.getElementById("edit-item");
+		edit_cust_btn.style.display = "none";
+		root.style.display = null;
+		root.setAttribute("id","root-new-item");
+		return;
+	}
+}
 function render_new_customer(){
 
 	/*get the root div*/
@@ -2031,7 +2062,7 @@ function add_line_to_order(tbl=null, table_id){
 
 function get_root_id(){
 	let root = null;
-	let ids = ["new-order-menu","edit-order-menu","root-new-customer","root-edit-customer","report-order-menu"];
+	let ids = ["new-order-menu","edit-order-menu","root-new-item","root-new-customer","root-edit-customer","report-order-menu"];
 	let size = ids.length;
 	let i = 0;
 	while(root === null && i < size){
@@ -2049,6 +2080,19 @@ function clear_order_screen(event){
 
 	if(event === undefined){
 		switch(root.id){
+			case "root-new-item":
+				{
+					root.style.display = "none";
+					root.setAttribute("id","hidden-root-new-item");
+					var btn = document.getElementById("back");
+					btn.textContent ="New Item";
+					btn.setAttribute("id", "new-item");
+					btn.removeEventListener("click",clear_order_screen);
+					btn.addEventListener("click",render_new_item);
+					var btn2 = document.getElementById("edit-item");
+					btn2.style.display = null;
+					break;
+				}
 			case "report-order-menu":
 				{
 					root.style.display = "none";
@@ -2127,6 +2171,19 @@ function clear_order_screen(event){
 		return;
 	}else if(event.type === 'click'){
 		switch(root.id){
+			case "root-new-item":
+				{
+					root.style.display = "none";
+					root.setAttribute("id","hidden-root-new-item");
+					var btn = document.getElementById("back");
+					btn.textContent ="New Item";
+					btn.setAttribute("id", "new-item");
+					btn.removeEventListener("click",clear_order_screen);
+					btn.addEventListener("click",render_new_item);
+					var btn2 = document.getElementById("edit-item");
+					btn2.style.display = null;
+					break;
+				}
 			case "report-order-menu":
 				{
 					root.style.display = "none";
