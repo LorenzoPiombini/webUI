@@ -52,6 +52,9 @@ function setupKeyboardNavigation() {
 		if (event.target.tagName === 'INPUT' || 
 		    event.target.tagName === 'TEXTAREA' || 
 		    event.target.isContentEditable) {
+			if(event.key === 'Escape'){
+				document.activeElement.blur();
+			}
 			return;
 		}
 
