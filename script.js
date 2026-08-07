@@ -1077,19 +1077,17 @@ function render_edit_item(){
 function render_new_item(){
 	/*get root div*/
 	var root = document.getElementById("hidden-root-new-item");
-	if(root){
-		const nw_item_btn = document.getElementById("new-item");
-		nw_item_btn.textContent = "Back";
-		nw_item_btn.setAttribute("id","back");
-		nw_item_btn.removeEventListener("click",render_new_item);
-		nw_item_btn.addEventListener("click",clear_order_screen);
-
-		const edit_cust_btn = document.getElementById("edit-item");
-		edit_cust_btn.style.display = "none";
-		root.style.display = null;
-		root.setAttribute("id","root-new-item");
-		return;
-	}
+	const nw_item_btn = document.getElementById("new-item");
+	nw_item_btn.textContent = "Back";
+	nw_item_btn.setAttribute("id","back");
+	nw_item_btn.removeEventListener("click",render_new_item);
+	nw_item_btn.addEventListener("click",clear_order_screen);
+	const edit_cust_btn = document.getElementById("edit-item");
+	edit_cust_btn.style.display = "none";
+	root.style.display = null;
+	root.setAttribute("id","root-new-item");
+	const save_item = document.getElementById("submit-item");
+	save_item.addEventListener("click",submit_item)
 }
 function render_new_customer(){
 
@@ -2431,6 +2429,25 @@ function get_table_data(table_id){
 	return data;
 }
 
+async function submit_item(value){
+
+	const item_name = document.getElementById("item-name");
+	const price_level = document.getElementById("item-price-level");
+	const unit_price = document.getElementById("itme-u-price");
+	const uom = document.getElementById("item-uom");
+
+	var payload = remove_null_values({
+		name: item_name.value === null ? null : item_name.value,
+		uom: uom.value === null ? null : uom.value,
+		price_level_id: price_level.value === null ? null : price_level.value,
+		unit_price: unit_price.value === null ? null : unit_price.value
+	});
+
+	
+	const response = await send(payload,"POST","new_item");
+	alert(`${response.message}`);
+}
+
 async function submit_order(crud_op,value,from_table){
 	const cust_id = document.getElementById("cust-id");
 	const price_level = document.getElementById("price-level");
@@ -2565,8 +2582,6 @@ function draw_edit_order_table(response,d,id=null,order_nr){
 	d.appendChild(input_customer);
 
 
-//	var br1 = document.createElement("br");
-//	d.appendChild(br1);
 
 	/*create price level input field*/	
 	var price_label = document.createElement("label");
