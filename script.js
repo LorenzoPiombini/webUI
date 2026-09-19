@@ -2432,22 +2432,23 @@ function get_table_data(table_id){
 	return data;
 }
 
-async function submit_item(value){
+async function submit_item(){
 
 	const item_name = document.getElementById("item-name");
 	const price_level = document.getElementById("item-price-level");
-	const unit_price = document.getElementById("itme-u-price");
+	const unit_price = document.getElementById("item-u-price");
 	const uom = document.getElementById("item-uom");
 
 	var payload = remove_null_values({
-		name: item_name.value === null ? null : item_name.value,
-		uom: uom.value === null ? null : uom.value,
-		price_level_id: price_level.value === null ? null : price_level.value,
-		unit_price: unit_price.value === null ? null : unit_price.value
+		name: item_name.value === "" ? null : item_name.value,
+		uom: uom.value === "" ? null : uom.value,
+		price_level_id: price_level.value === "" ? null : price_level.value,
+		unit_price: unit_price.value === "" ? null : Number(unit_price.value)
 	});
 
 	
-	const response = await send(payload,"POST","new_item");
+	const json_payload = JSON.stringify(payload);
+	const response = await send(json_payload,"POST","new_item");
 	alert(`${response.message}`);
 }
 
@@ -2486,7 +2487,7 @@ async function submit_order(crud_op,value,from_table){
 		date: date.textContent === "" ? null : date.textContent,
 		customer_id: cust_id.value === "" ? null : cust_id.value,
 		price_level_id: price_level.value === "" ? null : price_level.value,
-		lines_nr : `${lines_count}` 
+		lines_nr : Number(`${lines_count}`0
 	});
 
 	let payload = {
