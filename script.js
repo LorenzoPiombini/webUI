@@ -1752,7 +1752,7 @@ function render_new_order(){
 	add_line.className = "button";
 	add_line.setAttribute("id","add_line");
 	add_line.addEventListener("click",function(event){
-		add_line_to_order("new-order-table");
+		add_line_to_order(null,"new-order-table");
 	});
 	tableHeader.appendChild(add_line);
 
@@ -2385,7 +2385,7 @@ function get_table_data(table_id){
 						if(!child.classList.contains("tot")
 							&& !child.classList.contains("disc")
 							&& !child.classList.contains("price")){
-							row_obj[headers[index].toLowerCase().replace(" ","_")] = child.value;
+							row_obj[headers[index].toLowerCase().replace(" ","_")] = Number(child.value);
 						}
 					}
 				}
@@ -2487,7 +2487,7 @@ async function submit_order(crud_op,value,from_table){
 		date: date.textContent === "" ? null : date.textContent,
 		customer_id: cust_id.value === "" ? null : cust_id.value,
 		price_level_id: price_level.value === "" ? null : price_level.value,
-		lines_nr : Number(`${lines_count}`0
+		lines_nr : Number(`${lines_count}`)
 	});
 
 	let payload = {
@@ -2608,7 +2608,7 @@ function draw_edit_order_table(response,d,id=null,order_nr){
 	add_line.setAttribute("id","add_line");
 	add_line.setAttribute("style","font-size:18px;margin-rigth:18px;");
 	add_line.addEventListener("click", function(event){
-		add_line_to_order(id == null ? "edit-order-table" : id);
+		add_line_to_order(null,id == null ? "edit-order-table" : id);
 	});
 	d.appendChild(add_line);
 
